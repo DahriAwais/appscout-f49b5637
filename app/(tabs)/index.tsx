@@ -1,27 +1,17 @@
-import { Stack } from 'expo-router';
-import { Text } from 'heroui-native';
-import { View } from 'react-native';
-
-export default function Home() {
-  return <ScreenContent />;
-}
-
-function ScreenContent() {
-  return (
-    <View className="bg-background p-safe flex basis-full flex-col">
-      <Stack.Screen
-        options={{
-          title: 'Home',
-        }}
-      />
-      <View className="flex-1 items-center justify-center">
-        <Text.Heading type="h2" align="center" className="mb-4">
-          Welcome to Your App
-        </Text.Heading>
-        <Text.Paragraph align="center" color="muted">
-          This is your starting point. Start building something amazing!
-        </Text.Paragraph>
-      </View>
-    </View>
-  );
+import { useEffect } from 'react';
+import { router, useLocalSearchParams, usePathname } from 'expo-router';
+import BrowseScreen from '@/components/BrowseScreen';
+import { useScout } from '@/lib/store';
+export default function HomeScreen() {
+  const onboarded = useScout((s) => s.onboarded);
+  const pathname = usePathname();
+  const { browse } = useLocalSearchParams<{ browse?: string }>();
+  useEffect(() => {
+    const check = (completed: boolean) => {
+      if (!completed && browse !== '1' && pathname === '/') router.replace('/onboarding');
+    };
+    if (useScout.persist.hasHydrated()) check(onboarded);
+    return useScout.persist.onFinishHydration((state) => check(state.onboarded));
+  }, [onboarded, browse, pathname]);
+  return <BrowseScreen />;
 }

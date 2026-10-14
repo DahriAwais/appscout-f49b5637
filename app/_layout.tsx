@@ -27,6 +27,9 @@ import { initPostHog } from '@/lib/posthog';
 import { registerServiceWorker } from '@/lib/registerServiceWorker';
 import { reportErrorToParent } from '@/lib/reportPreviewError';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { colors } from '@/lib/theme';
+
+export const unstable_settings = { initialRouteName: '(tabs)' };
 
 /**
  * Custom ErrorBoundary that reports React render errors to the parent window (Bilt preview iframe)
@@ -145,8 +148,25 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ title: 'Habits', headerShown: false }} />
+        <Stack
+          screenOptions={{
+            contentStyle: { backgroundColor: colors.white },
+            headerStyle: { backgroundColor: colors.white },
+            headerTintColor: colors.ink,
+            headerShadowVisible: false,
+            headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
+          }}
+        >
+          <Stack.Screen name="(tabs)" options={{ title: 'Home', headerShown: false }} />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+          <Stack.Screen
+            name="app/[id]"
+            options={{ title: 'App research', headerBackButtonDisplayMode: 'minimal' }}
+          />
+          <Stack.Screen
+            name="methodology"
+            options={{ title: 'Behind the estimates', headerBackButtonDisplayMode: 'minimal' }}
+          />
         </Stack>
         <InstallPrompt />
       </HeroUINativeProvider>

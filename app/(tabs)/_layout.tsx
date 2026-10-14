@@ -1,42 +1,78 @@
-import { Home } from 'lucide-react-native';
+import { Platform } from 'react-native';
+import { Home, Compass, Bookmark, UserRound } from 'lucide-react-native';
 import { Tabs } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useThemeColor } from 'heroui-native';
-import { useUniwind } from 'uniwind';
-
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { colors as c } from '@/lib/theme';
+import { selection } from '@/lib/store';
 export default function TabLayout() {
-  const { theme } = useUniwind();
-  const [background, foreground, border, accent, muted] = useThemeColor([
-    'background',
-    'foreground',
-    'border',
-    'accent',
-    'muted',
-  ]);
-
+  const inset = useSafeAreaInsets();
   return (
     <>
-      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
+      {/* eslint-disable-next-line react/style-prop-object -- Expo StatusBar defines style as 'auto' | 'inverted' | 'light' | 'dark', not a View style object. */}
+      <StatusBar style="dark" />
       <Tabs
-        screenOptions={{
-          headerStyle: { backgroundColor: background },
-          headerTintColor: foreground,
-          headerTitleStyle: { color: foreground },
-          headerShadowVisible: false,
-          sceneStyle: { backgroundColor: background },
-          tabBarStyle: {
-            backgroundColor: background,
-            borderTopColor: border,
+        screenListeners={({ navigation, route }) => ({
+          tabPress: () => {
+            const state = navigation.getState();
+            if (state.routes[state.index]?.key !== route.key) selection();
           },
-          tabBarActiveTintColor: accent,
-          tabBarInactiveTintColor: muted,
+        })}
+        screenOptions={{
+          headerShown: false,
+          sceneStyle: { backgroundColor: c.white },
+          tabBarActiveTintColor: c.accent,
+          tabBarInactiveTintColor: c.muted,
+          tabBarLabelStyle: {
+            fontFamily: Platform.OS === 'web' ? 'Inter, system-ui, sans-serif' : 'Inter_500Medium',
+            fontWeight: '500',
+            fontSize: 11,
+            marginTop: 3,
+          },
+          tabBarItemStyle: { paddingTop: 10, paddingBottom: 10 },
+          tabBarStyle: {
+            position: 'absolute',
+            bottom: Math.max(inset.bottom, 16),
+            left: 20,
+            right: 20,
+            marginHorizontal: 20,
+            height: 72,
+            paddingBottom: 0,
+            paddingTop: 0,
+            borderRadius: 26,
+            backgroundColor: c.white,
+            borderTopWidth: 0,
+            shadowColor: c.shadow,
+            shadowOffset: { width: 0, height: 5 },
+            shadowRadius: 22,
+            shadowOpacity: 0.12,
+            elevation: 8,
+          },
         }}
       >
         <Tabs.Screen
           name="index"
+          options={{ title: 'Home', tabBarIcon: ({ color }) => <Home size={22} color={color} /> }}
+        />
+        <Tabs.Screen
+          name="explore"
           options={{
-            title: 'Home',
-            tabBarIcon: ({ color, size }) => <Home color={color} size={size ?? 24} />,
+            title: 'Explore',
+            tabBarIcon: ({ color }) => <Compass size={22} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="watchlist"
+          options={{
+            title: 'Watchlist',
+            tabBarIcon: ({ color }) => <Bookmark size={22} color={color} />,
+          }}
+        />
+        <Tabs.Screen
+          name="profile"
+          options={{
+            title: 'Profile',
+            tabBarIcon: ({ color }) => <UserRound size={22} color={color} />,
           }}
         />
       </Tabs>

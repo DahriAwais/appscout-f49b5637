@@ -1,0 +1,23 @@
+// Native color mirror of the light-only semantic theme in global.css.
+export const colors = {
+  white: '#FFFFFF',
+  ink: '#1E2A3B',
+  muted: '#6B778C',
+  surface: '#F7F8FA',
+  line: '#EEF0F4',
+  accent: '#5B6CFF',
+  accentSoft: '#EEF0FF',
+  money: '#087E49',
+  moneyBright: '#12B76A',
+  moneySoft: '#E9F8F0',
+  red: '#C43B48',
+  redSoft: '#FFF0F1',
+  amber: '#946500',
+  violet: '#8B67EC',
+  peach: '#FFAD8D',
+  blue: '#5D9BED',
+  teal: '#39A6AF',
+  yellow: '#F5CB69',
+  globeBlue: '#E6EDF5',
+  shadow: '#283B61',
+} as const;
