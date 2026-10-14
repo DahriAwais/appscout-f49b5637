@@ -12,7 +12,7 @@ import {
 } from 'lucide-react-native';
 import { colors as c } from '@/lib/theme';
 import { useScout } from '@/lib/store';
-import { Txt, Logo, DemoNotice } from '@/components/ScoutUI';
+import { Txt, Logo, SourceNotice } from '@/components/ScoutUI';
 export default function ProfileScreen() {
   const inset = useSafeAreaInsets();
   const watched = useScout((s) => s.watched);
@@ -22,11 +22,11 @@ export default function ProfileScreen() {
       style={{ backgroundColor: c.white }}
       contentContainerStyle={{
         paddingTop: inset.top + 26,
-        paddingHorizontal: 22,
+        paddingHorizontal: 16,
         paddingBottom: 130,
       }}
     >
-      <Txt style={{ fontSize: 29, fontFamily: 'Inter_700Bold', letterSpacing: -0.8 }}>
+      <Txt style={{ fontSize: 25, fontFamily: 'Inter_700Bold', letterSpacing: -0.8 }}>
         Your research space
       </Txt>
       <View style={{ paddingVertical: 35, alignItems: 'center', gap: 12 }}>
@@ -35,12 +35,12 @@ export default function ProfileScreen() {
         <Txt style={{ color: c.muted }}>See what apps could earn.</Txt>
       </View>
       <View style={{ backgroundColor: c.surface, borderRadius: 24, padding: 22, marginBottom: 30 }}>
-        <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17 }}>Demo mode</Txt>
+        <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17 }}>Real store data</Txt>
         <Txt style={{ color: c.muted, lineHeight: 22, marginTop: 9 }}>
-          Browse fictional apps and explore how revenue estimates work. Live store search is not
-          connected.
+          Search public Google Play listings. Actual revenue is private; scenarios use only the
+          assumptions you enter.
         </Txt>
-        <DemoNotice compact />
+        <SourceNotice />
       </View>
       {[
         { Icon: Calculator, label: 'How estimates work', press: () => router.push('/methodology') },

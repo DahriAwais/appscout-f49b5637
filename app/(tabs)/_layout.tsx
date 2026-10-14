@@ -27,17 +27,19 @@ export default function TabLayout() {
             fontFamily: Platform.OS === 'web' ? 'Inter, system-ui, sans-serif' : 'Inter_500Medium',
             fontWeight: '500',
             fontSize: 11,
-            marginTop: 3,
+            marginTop: 0,
+            lineHeight: 14,
           },
-          tabBarItemStyle: { paddingTop: 10, paddingBottom: 10 },
+          tabBarItemStyle: { paddingTop: 5, paddingBottom: 0 },
+          tabBarIconStyle: { height: 25 },
           tabBarStyle: {
             position: 'absolute',
             bottom: Math.max(inset.bottom, 16),
             left: 20,
             right: 20,
             marginHorizontal: 20,
-            height: 72,
-            paddingBottom: 0,
+            height: 68,
+            paddingBottom: 8,
             paddingTop: 0,
             borderRadius: 26,
             backgroundColor: c.white,
@@ -52,27 +54,38 @@ export default function TabLayout() {
       >
         <Tabs.Screen
           name="index"
-          options={{ title: 'Home', tabBarIcon: ({ color }) => <Home size={22} color={color} /> }}
+          options={{
+            title: 'Home',
+            tabBarIcon: ({ focused }) => (
+              <Home size={21} color={c.accent} fill={focused ? c.accentSoft : 'none'} />
+            ),
+          }}
         />
         <Tabs.Screen
           name="explore"
           options={{
             title: 'Explore',
-            tabBarIcon: ({ color }) => <Compass size={22} color={color} />,
+            tabBarIcon: ({ focused }) => (
+              <Compass size={21} color={c.teal} fill={focused ? c.moneySoft : 'none'} />
+            ),
           }}
         />
         <Tabs.Screen
           name="watchlist"
           options={{
             title: 'Watchlist',
-            tabBarIcon: ({ color }) => <Bookmark size={22} color={color} />,
+            tabBarIcon: ({ focused }) => (
+              <Bookmark size={21} color={c.amber} fill={focused ? c.yellow : 'none'} />
+            ),
           }}
         />
         <Tabs.Screen
           name="profile"
           options={{
             title: 'Profile',
-            tabBarIcon: ({ color }) => <UserRound size={22} color={color} />,
+            tabBarIcon: ({ focused }) => (
+              <UserRound size={21} color={c.violet} fill={focused ? c.accentSoft : 'none'} />
+            ),
           }}
         />
       </Tabs>

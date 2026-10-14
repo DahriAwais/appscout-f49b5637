@@ -2,6 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import * as Haptics from 'expo-haptics';
+import type { ScoutApp, Scenario } from './scout';
 export const selection = () => {
   void Haptics.selectionAsync();
 };
@@ -12,6 +13,10 @@ interface ScoutState {
   onboarded: boolean;
   watched: string[];
   recent: string[];
+  savedApps: Record<string, ScoutApp>;
+  scenarios: Record<string, { mid: number; inputs: Scenario }>;
+  rememberApp: (app: ScoutApp) => void;
+  saveScenario: (id: string, inputs: Scenario, mid: number) => void;
   completeOnboarding: () => void;
   toggleWatch: (id: string) => void;
   addRecent: (query: string) => void;
@@ -23,6 +28,13 @@ export const useScout = create<ScoutState>()(
       onboarded: false,
       watched: [],
       recent: [],
+      savedApps: {},
+      scenarios: {},
+      rememberApp: (app) => set((s) => ({ savedApps: { ...s.savedApps, [app.id]: app } })),
+      saveScenario: (id, inputs, mid) => {
+        set((s) => ({ scenarios: { ...s.scenarios, [id]: { mid, inputs } } }));
+        success();
+      },
       completeOnboarding: () => set({ onboarded: true }),
       toggleWatch: (id) => {
         set((s) => ({
@@ -37,6 +49,6 @@ export const useScout = create<ScoutState>()(
         success();
       },
     }),
-    { name: 'appscout-device-v1', storage: createJSONStorage(() => AsyncStorage) },
+    { name: 'appscout-live-v2', storage: createJSONStorage(() => AsyncStorage) },
   ),
 );

@@ -21,8 +21,9 @@ export default function MethodologyScreen() {
         An estimate.\nNot a revenue report.
       </Txt>
       <Txt style={{ color: c.muted, lineHeight: 23, marginTop: 16 }}>
-        Public installs and ratings cannot reveal an app’s actual earnings. AppScout models possible
-        monthly revenue using explicit assumptions. This version uses fictional demo data only.
+        Public installs and ratings cannot reveal an app’s actual earnings. Store facts come from
+        Google Play. Revenue stays unavailable until you enter your own assumptions in the scenario
+        calculator.
       </Txt>
       <View style={{ backgroundColor: c.surface, borderRadius: 24, padding: 22, marginTop: 30 }}>
         <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17 }}>The model</Txt>
@@ -54,7 +55,7 @@ export default function MethodologyScreen() {
         {
           Icon: Activity,
           title: 'Growth is not revenue',
-          body: 'Rating-count changes can be a momentum proxy, not verified download or earnings growth. Demo charts are illustrative.',
+          body: 'Rating-count changes are observed on app visits and can be a momentum proxy, not verified download or earnings growth. Missing days are not invented.',
         },
         {
           Icon: CircleDollarSign,
@@ -84,9 +85,9 @@ export default function MethodologyScreen() {
           Low confidence by design
         </Txt>
         <Txt style={{ lineHeight: 23, color: c.ink }}>
-          All demo estimates use a scenario range of 0.35× to 2.4× the midpoint. This is not a
-          statistical confidence interval. A reliable live model needs historical observations and
-          calibration against verified revenue.
+          Low and high scenarios come from the active-user bounds you enter, not an arbitrary
+          multiplier. These are assumption ranges, not statistical confidence intervals. A
+          calibrated earnings model needs verified revenue and market data.
         </Txt>
       </View>
     </ScrollView>

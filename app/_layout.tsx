@@ -28,6 +28,8 @@ import { registerServiceWorker } from '@/lib/registerServiceWorker';
 import { reportErrorToParent } from '@/lib/reportPreviewError';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { colors } from '@/lib/theme';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from '@/lib/play-store';
 
 export const unstable_settings = { initialRouteName: '(tabs)' };
 
@@ -147,29 +149,35 @@ export default function RootLayout() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <HeroUINativeProvider>
-        <Stack
-          screenOptions={{
-            contentStyle: { backgroundColor: colors.white },
-            headerStyle: { backgroundColor: colors.white },
-            headerTintColor: colors.ink,
-            headerShadowVisible: false,
-            headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
-          }}
-        >
-          <Stack.Screen name="(tabs)" options={{ title: 'Home', headerShown: false }} />
-          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="app/[id]"
-            options={{ title: 'App research', headerBackButtonDisplayMode: 'minimal' }}
-          />
-          <Stack.Screen
-            name="methodology"
-            options={{ title: 'Behind the estimates', headerBackButtonDisplayMode: 'minimal' }}
-          />
-        </Stack>
-        <InstallPrompt />
-      </HeroUINativeProvider>
+      <QueryClientProvider client={queryClient}>
+        <HeroUINativeProvider>
+          <Stack
+            screenOptions={{
+              contentStyle: { backgroundColor: colors.white },
+              headerStyle: { backgroundColor: colors.white },
+              headerTintColor: colors.ink,
+              headerShadowVisible: false,
+              headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
+            }}
+          >
+            <Stack.Screen name="(tabs)" options={{ title: 'Home', headerShown: false }} />
+            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="app/[id]"
+              options={{ title: 'App research', headerBackButtonDisplayMode: 'minimal' }}
+            />
+            <Stack.Screen
+              name="estimation/[id]"
+              options={{ title: 'Revenue scenario', headerBackButtonDisplayMode: 'minimal' }}
+            />
+            <Stack.Screen
+              name="methodology"
+              options={{ title: 'Behind the estimates', headerBackButtonDisplayMode: 'minimal' }}
+            />
+          </Stack>
+          <InstallPrompt />
+        </HeroUINativeProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }
