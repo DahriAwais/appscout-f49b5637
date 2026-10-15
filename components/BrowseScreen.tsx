@@ -58,9 +58,9 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
       style={{ flex: 1, backgroundColor: c.white }}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={{ paddingTop: inset.top + 12, paddingHorizontal: 16, paddingBottom: 8 }}>
+      <View style={{ paddingTop: inset.top + 6, paddingHorizontal: 16, paddingBottom: 8 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 44 }}>
-          {!searching && <Logo size={36} />}
+          {!searching && <Logo size={30} />}
           {searching ? (
             <View
               style={{
@@ -134,9 +134,9 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
           <Txt
             style={{
               fontFamily: 'Inter_700Bold',
-              fontSize: 25,
+              fontSize: 22,
               letterSpacing: -0.7,
-              marginTop: 22,
+              marginTop: 14,
               marginBottom: 4,
             }}
           >
@@ -172,7 +172,10 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
           data={feed.isPending || feed.isError ? [] : shown}
           keyExtractor={(a) => a.id}
           keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 115 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: Math.max(inset.bottom, 12) + 86,
+          }}
           ListHeaderComponent={
             <View>
               {!query && recent.length > 0 && (
@@ -193,7 +196,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
                   </ScrollView>
                 </View>
               )}
-              <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17, marginVertical: 14 }}>
+              <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, marginVertical: 10 }}>
                 {term ? `Results for “${term}”` : 'Popular on Google Play'}
               </Txt>
             </View>
@@ -234,7 +237,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingTop: 16, paddingBottom: 115 }}
+          contentContainerStyle={{ paddingTop: 10, paddingBottom: Math.max(inset.bottom, 12) + 86 }}
         >
           {feed.isPending ? (
             <View style={{ paddingHorizontal: 16 }}>
@@ -267,13 +270,13 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ gap: 14, paddingHorizontal: 16 }}
+                contentContainerStyle={{ gap: 12, paddingHorizontal: 16 }}
               >
                 {data.slice(0, 12).map((app) => (
                   <AppCard key={app.id} app={app} />
                 ))}
               </ScrollView>
-              <View style={{ paddingHorizontal: 16, marginTop: 28 }}>
+              <View style={{ paddingHorizontal: 16, marginTop: 20 }}>
                 <SectionHeading title="More to explore" />
                 {data.slice(12).map((app) => (
                   <AppRow key={app.id} app={app} />
@@ -281,8 +284,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
               </View>
               <View style={{ paddingHorizontal: 16, marginTop: 20 }}>
                 <Txt style={{ fontSize: 11, color: c.muted, lineHeight: 17 }}>
-                  Store data is live-fetched and cached for up to 5 minutes. Revenue is not publicly
-                  reported.
+                  Google Play listings · revenue scenarios use assumptions, not reported earnings.
                 </Txt>
               </View>
             </>

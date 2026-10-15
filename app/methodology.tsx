@@ -6,39 +6,55 @@ export default function MethodologyScreen() {
   return (
     <ScrollView
       style={{ backgroundColor: c.white }}
-      contentContainerStyle={{ padding: 24, paddingBottom: 60 }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
     >
       <Calculator size={34} color={c.accent} />
       <Txt
         style={{
           fontFamily: 'Inter_700Bold',
-          fontSize: 29,
-          letterSpacing: -0.8,
-          lineHeight: 36,
-          marginTop: 20,
+          fontSize: 23,
+          letterSpacing: -0.5,
+          lineHeight: 30,
+          marginTop: 16,
         }}
       >
-        An estimate.\nNot a revenue report.
+        An estimate, not a revenue report.
       </Txt>
       <Txt style={{ color: c.muted, lineHeight: 23, marginTop: 16 }}>
         Public installs and ratings cannot reveal an app’s actual earnings. Store facts come from
-        Google Play. Revenue stays unavailable until you enter your own assumptions in the scenario
-        calculator.
+        Google Play. Automatic scenarios use the install lower bound and listed monetization
+        streams, with explicit, editable defaults. They are not earnings reports.
       </Txt>
       <View style={{ backgroundColor: c.surface, borderRadius: 24, padding: 22, marginTop: 30 }}>
         <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17 }}>The model</Txt>
         <Txt style={{ lineHeight: 25, marginTop: 15 }}>
-          Monthly active users =\nInstalls × assumed active share
+          Monthly active users = installs × assumed active share
         </Txt>
         <Txt style={{ lineHeight: 25, marginTop: 17 }}>
-          Purchases =\nActive users × paying share × monthly spend
+          Purchases = active users × paying share × monthly spend
         </Txt>
         <Txt style={{ lineHeight: 25, marginTop: 17 }}>
-          Advertising =\nActive users × ad impressions ÷ 1,000 × eCPM
+          Advertising = active users × ad impressions ÷ 1,000 × eCPM
+        </Txt>
+        <Txt style={{ lineHeight: 22, marginTop: 14, color: c.muted }}>
+          Automatic active shares (low / mid / high): 3 / 10 / 25% for apps up to 12 months old, 2 /
+          7 / 18% for 13–36 months, and 1 / 4 / 12% for older apps. Unknown launch age uses 1 / 5 /
+          15%. These are chosen assumptions, not measured retention or benchmarks.
+        </Txt>
+        <Txt style={{ lineHeight: 22, marginTop: 12, color: c.muted }}>
+          Listed purchases use 1% paying users at $5 per month. Listed ads use 40 impressions per
+          active user at $2 per 1,000 impressions. Unknown streams and upfront app sales are
+          excluded, as are platform fees and taxes. Missing signals leave the automatic estimate
+          unavailable.
+        </Txt>
+        <Txt style={{ lineHeight: 22, marginTop: 12, color: c.muted }}>
+          Only active users vary across the default range. Actual earnings may fall outside it;
+          conversion, spending, ad rates and geography are also unknown. Saved assumptions override
+          defaults.
         </Txt>
         <View style={{ height: 1, backgroundColor: c.line, marginVertical: 19 }} />
         <Txt style={{ color: c.money, fontFamily: 'Inter_600SemiBold', lineHeight: 23 }}>
-          Est. monthly revenue =\nPurchases + advertising
+          Est. monthly revenue = purchases + advertising
         </Txt>
       </View>
       <Txt
@@ -85,9 +101,9 @@ export default function MethodologyScreen() {
           Low confidence by design
         </Txt>
         <Txt style={{ lineHeight: 23, color: c.ink }}>
-          Low and high scenarios come from the active-user bounds you enter, not an arbitrary
-          multiplier. These are assumption ranges, not statistical confidence intervals. A
-          calibrated earnings model needs verified revenue and market data.
+          Low and high scenarios vary the assumed active-user bounds, not observed earnings. These
+          are assumption ranges, not statistical confidence intervals. A calibrated earnings model
+          needs verified revenue and market data.
         </Txt>
       </View>
     </ScrollView>

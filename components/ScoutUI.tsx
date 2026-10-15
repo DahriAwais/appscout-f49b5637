@@ -14,10 +14,11 @@ import {
 import { useState } from 'react';
 import { colors as c } from '@/lib/theme';
 import { money, type ScoutApp } from '@/lib/scout';
+import { useRevenueScenario } from '@/lib/revenue';
 import { useScout } from '@/lib/store';
 export function Txt({ style, ...props }: TextProps) {
   const resolved = StyleSheet.flatten([
-    { fontFamily: 'Inter_400Regular', color: c.ink, fontSize: 13 },
+    { fontFamily: 'Inter_400Regular', color: c.ink, fontSize: 13, includeFontPadding: false },
     style,
   ]);
   const weight = resolved.fontFamily?.includes('700')
@@ -95,24 +96,24 @@ export function AppIcon({
   );
 }
 export function Revenue({ app }: { app: ScoutApp }) {
-  const scenarios = useScout((s) => s.scenarios);
-  const value = scenarios[app.id];
+  const { result: value } = useRevenueScenario(app);
   return (
-    <View style={{ flexDirection: 'row', gap: 3, alignItems: 'center' }}>
+    <View style={{ flexDirection: 'row', gap: 2, alignItems: 'center' }}>
       <Txt
         numberOfLines={1}
         style={{
           color: value ? c.money : c.muted,
           fontSize: 11,
+          flexShrink: 1,
           fontFamily: value ? 'Inter_600SemiBold' : 'Inter_400Regular',
         }}
       >
-        {value ? `${money(value.mid)}/mo est.` : 'Est. —'}
+        {value ? `Est. ${money(value.mid)}/mo` : 'Est. —'}
       </Txt>
       <PressableFeedback
         onPress={() => router.push('/methodology')}
         accessibilityLabel="How we estimate"
-        style={{ padding: 6 }}
+        style={{ paddingVertical: 8, paddingHorizontal: 2, minHeight: 32 }}
       >
         <Info size={12} color={value ? c.money : c.muted} />
       </PressableFeedback>
@@ -121,20 +122,20 @@ export function Revenue({ app }: { app: ScoutApp }) {
 }
 export function AppCard({ app }: { app: ScoutApp }) {
   return (
-    <View style={{ width: 102 }}>
+    <View style={{ width: 94 }}>
       <PressableFeedback
         onPress={() => router.push({ pathname: '/app/[id]', params: { id: app.id } })}
         accessibilityLabel={`${app.name}, ${app.rating?.toFixed(1) ?? 'unrated'}, open research`}
       >
-        <AppIcon app={app} size={88} />
+        <AppIcon app={app} size={64} />
         <Txt
           numberOfLines={2}
           style={{
             fontFamily: 'Inter_600SemiBold',
             fontSize: 12,
-            lineHeight: 17,
-            marginTop: 8,
-            minHeight: 34,
+            lineHeight: 16,
+            marginTop: 6,
+            minHeight: 32,
           }}
         >
           {app.name}
@@ -161,7 +162,7 @@ export function AppRow({
 }) {
   const toggle = useScout((s) => s.toggleWatch);
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 9 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 7 }}>
       <PressableFeedback
         onPress={() => {
           onOpen?.();
@@ -169,7 +170,7 @@ export function AppRow({
         }}
         style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 11 }}
       >
-        <AppIcon app={app} size={50} />
+        <AppIcon app={app} size={42} />
         <View style={{ flex: 1 }}>
           <Txt numberOfLines={1} style={{ fontFamily: 'Inter_600SemiBold' }}>
             {app.name}
@@ -183,7 +184,7 @@ export function AppRow({
           </View>
         </View>
       </PressableFeedback>
-      <View style={{ maxWidth: 114 }}>
+      <View style={{ maxWidth: 106 }}>
         <Revenue app={app} />
       </View>
       {removable && (
@@ -207,10 +208,10 @@ export function SectionHeading({ title, onPress }: { title: string; onPress?: ()
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        marginBottom: 14,
+        marginBottom: 10,
       }}
     >
-      <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 18, flex: 1 }}>{title}</Txt>
+      <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, flex: 1 }}>{title}</Txt>
       {onPress && (
         <Button
           isIconOnly
@@ -256,10 +257,10 @@ export function EmptyState({
 }
 export function LoadingRows() {
   return (
-    <View style={{ gap: 20, paddingVertical: 16 }}>
+    <View style={{ gap: 16, paddingVertical: 12 }}>
       {[0, 1, 2, 3, 4].map((i) => (
         <View key={i} style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
-          <Skeleton className="h-12 w-12 rounded-2xl" />
+          <Skeleton className="h-10 w-10 rounded-xl" />
           <View style={{ flex: 1, gap: 8 }}>
             <Skeleton className="h-4 w-4/5 rounded-md" />
             <Skeleton className="h-3 w-1/2 rounded-md" />

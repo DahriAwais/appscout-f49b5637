@@ -51,6 +51,44 @@ export interface Scenario {
   impressions: number;
   ecpm: number;
 }
+export interface AutomaticScenario {
+  inputs: Scenario;
+  activeShares: readonly [number, number, number];
+  ageMonths: number | null;
+}
+
+// Scenario defaults are product assumptions, not measured retention or industry benchmarks.
+export function automaticScenario(app: ScoutApp, now = Date.now()): AutomaticScenario | null {
+  if (app.installs === null || !Number.isFinite(app.installs) || app.installs <= 0) return null;
+  if (app.offersIAP !== true && app.adSupported !== true) return null;
+  const launched = app.launched ? new Date(app.launched).getTime() : NaN;
+  const ageMonths =
+    Number.isFinite(launched) && launched <= now
+      ? Math.max(1, (now - launched) / (30.4375 * 86400000))
+      : null;
+  const activeShares: readonly [number, number, number] =
+    ageMonths === null
+      ? [1, 5, 15]
+      : ageMonths <= 12
+        ? [3, 10, 25]
+        : ageMonths <= 36
+          ? [2, 7, 18]
+          : [1, 4, 12];
+  return {
+    ageMonths,
+    activeShares,
+    inputs: {
+      monthlyActiveLow: Math.round((app.installs * activeShares[0]) / 100),
+      monthlyActive: Math.round((app.installs * activeShares[1]) / 100),
+      monthlyActiveHigh: Math.round((app.installs * activeShares[2]) / 100),
+      payingPercent: app.offersIAP === true ? 1 : 0,
+      monthlySpend: app.offersIAP === true ? 5 : 0,
+      impressions: app.adSupported === true ? 40 : 0,
+      ecpm: app.adSupported === true ? 2 : 0,
+    },
+  };
+}
+
 export function estimate(s: Scenario) {
   const purchases = ((s.monthlyActive * s.payingPercent) / 100) * s.monthlySpend;
   const ads = ((s.monthlyActive * s.impressions) / 1000) * s.ecpm;
@@ -66,9 +104,9 @@ export function estimate(s: Scenario) {
 }
 export function money(n: number) {
   return n >= 1e6
-    ? `$${(n / 1e6).toFixed(1)}M`
+    ? `$${+(n / 1e6).toFixed(1)}M`
     : n >= 1e3
-      ? `$${(n / 1e3).toFixed(1)}K`
+      ? `$${+(n / 1e3).toFixed(1)}K`
       : `$${Math.round(n).toLocaleString('en-US')}`;
 }
 export function compact(n: number) {

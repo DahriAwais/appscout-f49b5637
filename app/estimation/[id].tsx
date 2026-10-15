@@ -5,10 +5,11 @@ import { Button, Input, Label, FieldError } from 'heroui-native';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors as c } from '@/lib/theme';
-import { estimate, money, type Scenario } from '@/lib/scout';
-import { useScout } from '@/lib/store';
+import { automaticScenario, estimate, money, type Scenario, type ScoutApp } from '@/lib/scout';
+import { useScout, selection } from '@/lib/store';
 import { usePlayDetail } from '@/lib/play-store';
 import { Txt, AppIcon, EmptyState, LoadingRows } from '@/components/ScoutUI';
+import { RevenueAssumptions } from '@/components/RevenueAssumptions';
 const fields: { key: keyof Scenario; label: string; max?: number }[] = [
   { key: 'monthlyActiveLow', label: 'Monthly active users · low' },
   { key: 'monthlyActive', label: 'Monthly active users · mid' },
@@ -18,21 +19,24 @@ const fields: { key: keyof Scenario; label: string; max?: number }[] = [
   { key: 'impressions', label: 'Monthly ad impressions per user' },
   { key: 'ecpm', label: 'Ad revenue per 1,000 impressions (USD)' },
 ];
-export default function EstimationScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
-  const detail = usePlayDetail(id);
-  const stored = useScout((s) => s.scenarios[id]);
+function fieldValues(inputs: Scenario | undefined): Record<keyof Scenario, string> {
+  return {
+    monthlyActiveLow: inputs ? String(inputs.monthlyActiveLow) : '',
+    monthlyActive: inputs ? String(inputs.monthlyActive) : '',
+    monthlyActiveHigh: inputs ? String(inputs.monthlyActiveHigh) : '',
+    payingPercent: inputs ? String(inputs.payingPercent) : '',
+    monthlySpend: inputs ? String(inputs.monthlySpend) : '',
+    impressions: inputs ? String(inputs.impressions) : '',
+    ecpm: inputs ? String(inputs.ecpm) : '',
+  };
+}
+function ScenarioForm({ app }: { app: ScoutApp }) {
+  const stored = useScout((s) => s.scenarios[app.id]);
   const save = useScout((s) => s.saveScenario);
+  const automatic = automaticScenario(app);
   const inset = useSafeAreaInsets();
-  const [values, setValues] = useState<Record<keyof Scenario, string>>({
-    monthlyActiveLow: stored ? String(stored.inputs.monthlyActiveLow) : '',
-    monthlyActive: stored ? String(stored.inputs.monthlyActive) : '',
-    monthlyActiveHigh: stored ? String(stored.inputs.monthlyActiveHigh) : '',
-    payingPercent: stored ? String(stored.inputs.payingPercent) : '',
-    monthlySpend: stored ? String(stored.inputs.monthlySpend) : '',
-    impressions: stored ? String(stored.inputs.impressions) : '',
-    ecpm: stored ? String(stored.inputs.ecpm) : '',
-  });
+  const [values, setValues] = useState(() => fieldValues(stored?.inputs ?? automatic?.inputs));
+  const [custom, setCustom] = useState(Boolean(stored));
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const inputs: Scenario = {
@@ -56,7 +60,7 @@ export default function EstimationScreen() {
     inputs.monthlyActive <= inputs.monthlyActiveHigh;
   const result = complete && ordered ? estimate(inputs) : null;
   const submit = () => {
-    if (!complete || !ordered) {
+    if (!result) {
       setError(
         !complete
           ? 'Enter a valid non-negative number in every field. Use 0 for a stream that does not apply.'
@@ -66,62 +70,64 @@ export default function EstimationScreen() {
       return;
     }
     setSaving(true);
-    save(id, inputs, estimate(inputs).mid);
-    router.dismissTo({ pathname: '/app/[id]', params: { id } });
+    save(app.id, inputs, result.mid);
+    router.dismissTo({ pathname: '/app/[id]', params: { id: app.id } });
   };
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: c.white }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <Stack.Screen options={{ headerBackVisible: true }} />
+    <>
       <ScrollView
         keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ padding: 16, paddingBottom: 24 }}
       >
         <Link
-          href={{ pathname: '/app/[id]', params: { id } }}
-          style={{ color: c.accent, fontSize: 12, marginBottom: 16 }}
+          href={{ pathname: '/app/[id]', params: { id: app.id } }}
+          style={{ color: c.accent, fontSize: 12, marginBottom: 12 }}
         >
           Back to app
         </Link>
-        {detail.isPending ? (
-          <LoadingRows />
-        ) : detail.isError ? (
-          <EmptyState
-            title="Could not load this app"
-            action="Try again"
-            onPress={() => void detail.refetch()}
-          />
-        ) : (
-          detail.data && (
-            <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginBottom: 22 }}>
-              <AppIcon app={detail.data.app} size={48} />
-              <Txt style={{ flex: 1, fontSize: 18, fontFamily: 'Inter_600SemiBold' }}>
-                {detail.data.app.name}
-              </Txt>
-            </View>
-          )
-        )}
+        <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 16 }}>
+          <AppIcon app={app} size={40} />
+          <Txt style={{ flex: 1, fontSize: 16, fontFamily: 'Inter_600SemiBold' }}>{app.name}</Txt>
+        </View>
         <View
-          style={{ backgroundColor: c.moneySoft, padding: 20, borderRadius: 24, marginBottom: 22 }}
+          style={{ backgroundColor: c.moneySoft, padding: 16, borderRadius: 24, marginBottom: 16 }}
         >
-          <Txt style={{ color: c.money, fontSize: 12 }}>Your monthly revenue scenario · USD</Txt>
-          <Txt style={{ fontFamily: 'Inter_700Bold', color: c.money, fontSize: 32, marginTop: 8 }}>
+          <Txt style={{ color: c.money, fontSize: 12 }}>Est. monthly revenue · USD</Txt>
+          <Txt style={{ fontFamily: 'Inter_700Bold', color: c.money, fontSize: 28, marginTop: 6 }}>
             {result ? `${money(result.mid)}/mo est.` : 'Not estimated'}
           </Txt>
           {result && (
-            <Txt style={{ color: c.money, marginTop: 8, fontSize: 12 }}>
+            <Txt style={{ color: c.money, marginTop: 6, fontSize: 12 }}>
               Low {money(result.low)} · High {money(result.high)}
             </Txt>
           )}
+          <Txt style={{ color: c.money, fontSize: 11, marginTop: 8 }}>
+            Low confidence · {custom ? 'your assumptions' : 'automatic assumptions'}
+          </Txt>
         </View>
-        <Txt style={{ color: c.muted, fontSize: 12, lineHeight: 20, marginBottom: 22 }}>
-          These are your assumptions, not Google Play facts. Cumulative installs do not reveal
-          monthly active users. Enter 0 for purchases or ads that do not apply.
+        <RevenueAssumptions app={app} inputs={result ? inputs : undefined} custom={custom} />
+        {automatic && (
+          <Button
+            size="sm"
+            variant="secondary"
+            style={{ alignSelf: 'flex-start', marginTop: 14 }}
+            onPress={() => {
+              setValues(fieldValues(automatic.inputs));
+              setCustom(false);
+              setError('');
+              selection();
+            }}
+          >
+            <Button.Label>Use automatic defaults</Button.Label>
+          </Button>
+        )}
+        <Txt
+          style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, marginTop: 24, marginBottom: 14 }}
+        >
+          Edit assumptions
         </Txt>
         {fields.map((f) => (
-          <View key={f.key} style={{ gap: 8, marginBottom: 18 }}>
+          <View key={f.key} style={{ gap: 6, marginBottom: 14 }}>
             <Label>{f.label}</Label>
             <Input
               accessibilityLabel={f.label}
@@ -129,6 +135,7 @@ export default function EstimationScreen() {
               value={values[f.key]}
               onChangeText={(value) => {
                 setValues((v) => ({ ...v, [f.key]: value }));
+                setCustom(true);
                 setError('');
               }}
               placeholder="Enter your assumption"
@@ -151,9 +158,34 @@ export default function EstimationScreen() {
         }}
       >
         <Button onPress={submit} isDisabled={saving}>
-          <Button.Label>{saving ? 'Saving…' : 'Save scenario'}</Button.Label>
+          <Button.Label>{saving ? 'Saving…' : 'Save assumptions'}</Button.Label>
         </Button>
       </View>
+    </>
+  );
+}
+export default function EstimationScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const detail = usePlayDetail(id);
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: c.white }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <Stack.Screen options={{ headerBackVisible: true }} />
+      {detail.isPending ? (
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          <LoadingRows />
+        </ScrollView>
+      ) : detail.isError || !detail.data ? (
+        <EmptyState
+          title="Could not load this app"
+          action="Try again"
+          onPress={() => void detail.refetch()}
+        />
+      ) : (
+        <ScenarioForm key={id} app={detail.data.app} />
+      )}
     </KeyboardAvoidingView>
   );
 }

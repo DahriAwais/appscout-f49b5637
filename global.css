@@ -43,39 +43,43 @@
   :root {
     @variant light {
       --background: oklch(1 0 0);
-      --foreground: oklch(0.28 0.035 257);
-      --surface: oklch(0.98 0.003 260);
-      --surface-foreground: oklch(0.28 0.035 257);
-      --muted: oklch(0.56 0.035 260);
-      --accent: oklch(0.59 0.22 276);
+      --foreground: oklch(0.279 0.041 260.031);
+      --surface: oklch(0.984 0.003 247.858);
+      --surface-foreground: oklch(0.279 0.041 260.031);
+      --muted: oklch(0.554 0.046 257.417);
+      --accent: oklch(0.511 0.262 276.966);
       --accent-foreground: oklch(1 0 0);
-      --default: oklch(0.97 0.004 260);
-      --default-foreground: oklch(0.28 0.035 257);
-      --field-background: oklch(0.98 0.003 260);
-      --field-foreground: oklch(0.28 0.035 257);
-      --border: oklch(0.95 0.005 260);
+      --accent-soft: oklch(0.962 0.018 272.314);
+      --accent-soft-foreground: oklch(0.511 0.262 276.966);
+      --default: oklch(0.968 0.007 247.896);
+      --default-foreground: oklch(0.279 0.041 260.031);
+      --field-background: oklch(0.984 0.003 247.858);
+      --field-foreground: oklch(0.279 0.041 260.031);
+      --border: oklch(0.968 0.007 247.896);
       --focus: var(--accent);
-      --success: oklch(0.69 0.17 155);
-      --color-money: oklch(0.52 0.13 155);
-      --color-money-soft: oklch(0.97 0.025 155);
+      --success: oklch(0.696 0.17 162.48);
+      --color-money: oklch(0.508 0.118 165.612);
+      --color-money-soft: oklch(0.979 0.021 166.113);
     }
     @variant dark {
       --background: oklch(1 0 0);
-      --foreground: oklch(0.28 0.035 257);
-      --surface: oklch(0.98 0.003 260);
-      --surface-foreground: oklch(0.28 0.035 257);
-      --muted: oklch(0.56 0.035 260);
-      --accent: oklch(0.59 0.22 276);
+      --foreground: oklch(0.279 0.041 260.031);
+      --surface: oklch(0.984 0.003 247.858);
+      --surface-foreground: oklch(0.279 0.041 260.031);
+      --muted: oklch(0.554 0.046 257.417);
+      --accent: oklch(0.511 0.262 276.966);
       --accent-foreground: oklch(1 0 0);
-      --default: oklch(0.97 0.004 260);
-      --default-foreground: oklch(0.28 0.035 257);
-      --field-background: oklch(0.98 0.003 260);
-      --field-foreground: oklch(0.28 0.035 257);
-      --border: oklch(0.95 0.005 260);
+      --accent-soft: oklch(0.962 0.018 272.314);
+      --accent-soft-foreground: oklch(0.511 0.262 276.966);
+      --default: oklch(0.968 0.007 247.896);
+      --default-foreground: oklch(0.279 0.041 260.031);
+      --field-background: oklch(0.984 0.003 247.858);
+      --field-foreground: oklch(0.279 0.041 260.031);
+      --border: oklch(0.968 0.007 247.896);
       --focus: var(--accent);
-      --success: oklch(0.69 0.17 155);
-      --color-money: oklch(0.52 0.13 155);
-      --color-money-soft: oklch(0.97 0.025 155);
+      --success: oklch(0.696 0.17 162.48);
+      --color-money: oklch(0.508 0.118 165.612);
+      --color-money-soft: oklch(0.979 0.021 166.113);
     }
   }
 }

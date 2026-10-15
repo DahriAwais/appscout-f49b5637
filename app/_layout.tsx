@@ -10,6 +10,7 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
 import { useEffect } from 'react';
 import * as DevClient from 'expo-dev-client';
@@ -148,9 +149,11 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
       <QueryClientProvider client={queryClient}>
         <HeroUINativeProvider>
+          {/* oxlint-disable-next-line react/style-prop-object -- Expo StatusBar's style is a theme enum. */}
+          <StatusBar style="dark" />
           <Stack
             screenOptions={{
               contentStyle: { backgroundColor: colors.white },

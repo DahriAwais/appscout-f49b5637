@@ -22,13 +22,13 @@ export function InsightCard({
       style={{
         backgroundColor: c.white,
         borderRadius: 24,
-        padding: 20,
-        marginBottom: 16,
+        padding: 16,
+        marginBottom: 12,
         shadowColor: c.shadow,
         shadowOffset: { width: 0, height: 3 },
         shadowOpacity: 0.065,
         shadowRadius: 14,
-        elevation: 2,
+        elevation: 1,
       }}
     >
       <PressableFeedback
@@ -45,10 +45,10 @@ export function InsightCard({
           alignItems: 'center',
           minHeight: 44,
           marginTop: -8,
-          marginBottom: 12,
+          marginBottom: 6,
         }}
       >
-        <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17, flex: 1 }}>{title}</Txt>
+        <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 15, flex: 1 }}>{title}</Txt>
         {expanded ? (
           <ChevronUp size={17} color={c.accent} />
         ) : (
@@ -56,7 +56,7 @@ export function InsightCard({
         )}
       </PressableFeedback>
       {children}
-      <Txt numberOfLines={1} style={{ color: c.muted, fontSize: 11, marginTop: 14 }}>
+      <Txt numberOfLines={1} style={{ color: c.muted, fontSize: 11, marginTop: 10 }}>
         {insight}
       </Txt>
       {expanded && (
@@ -69,7 +69,7 @@ export function InsightCard({
 }
 export function Unavailable({ text }: { text: string }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 15 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, paddingVertical: 10 }}>
       <Clock3 size={19} color={c.accent} />
       <Txt style={{ flex: 1, fontSize: 12, lineHeight: 19, color: c.muted }}>{text}</Txt>
     </View>

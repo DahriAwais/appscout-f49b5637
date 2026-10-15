@@ -33,15 +33,9 @@ import Svg, { Circle } from 'react-native-svg';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
 import { colors as c } from '@/lib/theme';
-import {
-  compact,
-  money,
-  dateLabel,
-  ago,
-  estimate,
-  type ScoutApp,
-  type Snapshot,
-} from '@/lib/scout';
+import { compact, money, dateLabel, ago, type ScoutApp, type Snapshot } from '@/lib/scout';
+import { useRevenueScenario } from '@/lib/revenue';
+import { RevenueAssumptions } from '@/components/RevenueAssumptions';
 import { buildInsights, opportunityScore } from '@/lib/insights';
 import { useScout } from '@/lib/store';
 import { usePlayDetail, usePlaySection, useErrorFeedback, playRequest } from '@/lib/play-store';
@@ -68,7 +62,7 @@ function CountAmount({ value }: { value: number }) {
     };
   }, [anim, value, reduced]);
   return (
-    <Txt style={{ fontFamily: 'Inter_700Bold', fontSize: 32, color: c.money, letterSpacing: -1 }}>
+    <Txt style={{ fontFamily: 'Inter_700Bold', fontSize: 28, color: c.money, letterSpacing: -1 }}>
       {money(shown)}
       <Txt style={{ fontSize: 15, color: c.money }}>/mo est.</Txt>
     </Txt>
@@ -100,14 +94,14 @@ function Screenshot({
       alive = false;
     };
   }, [uri]);
-  const width = Math.min(240, Math.max(80, 158 * ratio));
+  const width = Math.min(200, Math.max(72, 132 * ratio));
   return (
     <PressableFeedback
       onPress={() => open(uri)}
       accessibilityLabel={`Open store screenshot ${index + 1}`}
       style={{
         width,
-        height: 158,
+        height: 132,
         borderRadius: 16,
         overflow: 'hidden',
         backgroundColor: c.surface,
@@ -122,7 +116,7 @@ function Screenshot({
           source={{ uri }}
           resizeMode="contain"
           onError={() => setFailed(true)}
-          style={{ width, height: 158, resizeMode: 'contain' }}
+          style={{ width, height: 132, resizeMode: 'contain' }}
         />
       )}
     </PressableFeedback>
@@ -177,7 +171,7 @@ function QuickTake({ app, history }: { app: ScoutApp; history: Snapshot[] }) {
           </Txt>
         </View>
       </View>
-      <View style={{ gap: 13, marginTop: 18 }}>
+      <View style={{ gap: 10, marginTop: 12 }}>
         {insights.map((line) => {
           const Icon =
             line.badge === 'Rising'
@@ -237,13 +231,13 @@ function StatTiles({ app }: { app: ScoutApp }) {
     },
   ];
   return (
-    <View style={{ gap: 10, marginBottom: 20 }}>
+    <View style={{ gap: 8, marginBottom: 16 }}>
       {[stats.slice(0, 2), stats.slice(2)].map((row) => (
         <View key={row[0].label} style={{ flexDirection: 'row', gap: 10 }}>
           {row.map((s) => (
             <View
               key={s.label}
-              style={{ flex: 1, borderRadius: 20, backgroundColor: c.surface, padding: 15 }}
+              style={{ flex: 1, borderRadius: 18, backgroundColor: c.surface, padding: 12 }}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                 <s.Icon size={14} color={c.accent} />
@@ -251,7 +245,7 @@ function StatTiles({ app }: { app: ScoutApp }) {
               </View>
               <Txt
                 numberOfLines={1}
-                style={{ fontSize: 19, fontFamily: 'Inter_600SemiBold', marginTop: 10 }}
+                style={{ fontSize: 17, fontFamily: 'Inter_600SemiBold', marginTop: 8 }}
               >
                 {s.value}
               </Txt>
@@ -322,8 +316,7 @@ function InstallMilestones({ app }: { app: ScoutApp }) {
   );
 }
 function RevenueModel({ app }: { app: ScoutApp }) {
-  const saved = useScout((s) => s.scenarios[app.id]);
-  const rev = saved ? estimate(saved.inputs) : null;
+  const { result: rev, source } = useRevenueScenario(app);
   const chips = [
     { name: 'Free', on: app.free === true },
     { name: 'In-app purchases', on: app.offersIAP === true },
@@ -339,9 +332,9 @@ function RevenueModel({ app }: { app: ScoutApp }) {
       insight="Store labels show monetization, not earnings"
       detail={
         <Txt style={{ color: c.muted, lineHeight: 20 }}>
-          Subscription is not confirmed by the public purchase flag. The stream split comes only
-          from your saved scenario. IAP dots mark the published range endpoints, not individual
-          products.
+          Subscription is not confirmed by the public purchase flag. The stream split is modeled
+          from assumptions, not observed revenue. IAP dots mark the published range endpoints, not
+          individual products.
         </Txt>
       }
     >
@@ -377,7 +370,8 @@ function RevenueModel({ app }: { app: ScoutApp }) {
             <View style={{ flex: rev.ads, backgroundColor: c.moneyBright }} />
           </View>
           <Txt style={{ fontSize: 11, color: c.money, marginTop: 8 }}>
-            Your scenario: purchases {Math.round((rev.purchases / rev.mid) * 100)}% · ads{' '}
+            {source === 'custom' ? 'Your scenario' : 'Automatic scenario'}: purchases{' '}
+            {Math.round((rev.purchases / rev.mid) * 100)}% · ads{' '}
             {Math.round((rev.ads / rev.mid) * 100)}%
           </Txt>
         </>
@@ -616,14 +610,13 @@ export default function DetailScreen() {
   const watched = useScout((s) => s.watched);
   const toggle = useScout((s) => s.toggleWatch);
   const remember = useScout((s) => s.rememberApp);
-  const scenario = useScout((s) => s.scenarios[id]);
+  const { result: rev, source, inputs } = useRevenueScenario(app);
   const saved = watched.includes(id);
   const inset = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const [compactHeader, setCompactHeader] = useState(false);
   const [sheet, setSheet] = useState<'estimate' | 'screenshot' | null>(null);
   const [image, setImage] = useState('');
-  const rev = scenario ? estimate(scenario.inputs) : null;
   useEffect(() => {
     if (app) remember(app);
   }, [app, remember]);
@@ -673,10 +666,10 @@ export default function DetailScreen() {
         keyboardShouldPersistTaps="handled"
         scrollEventThrottle={32}
         onScroll={(e) => {
-          const next = e.nativeEvent.contentOffset.y > 190;
+          const next = e.nativeEvent.contentOffset.y > 160;
           if (next !== compactHeader) setCompactHeader(next);
         }}
-        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 14, paddingBottom: 30 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 24 }}
       >
         {!router.canGoBack() && (
           <Link href="/explore" style={{ color: c.accent, fontSize: 12, marginBottom: 14 }}>
@@ -686,17 +679,17 @@ export default function DetailScreen() {
         {detail.isPending ? (
           <>
             <View style={{ flexDirection: 'row', gap: 12 }}>
-              <Skeleton className="h-16 w-16 rounded-2xl" />
+              <Skeleton className="h-12 w-12 rounded-xl" />
               <View style={{ flex: 1, gap: 10 }}>
                 <Skeleton className="h-6 w-full rounded-md" />
                 <Skeleton className="h-3 w-2/3 rounded-md" />
               </View>
             </View>
-            <Skeleton className="mt-6 h-40 w-full rounded-3xl" />
+            <Skeleton className="mt-4 h-32 w-full rounded-3xl" />
             <View style={{ flexDirection: 'row', gap: 10, marginTop: 20 }}>
-              <Skeleton className="h-40 flex-1 rounded-2xl" />
-              <Skeleton className="h-40 flex-1 rounded-2xl" />
-              <Skeleton className="h-40 flex-1 rounded-2xl" />
+              <Skeleton className="h-32 flex-1 rounded-2xl" />
+              <Skeleton className="h-32 flex-1 rounded-2xl" />
+              <Skeleton className="h-32 flex-1 rounded-2xl" />
             </View>
             <LoadingRows />
           </>
@@ -708,13 +701,13 @@ export default function DetailScreen() {
           />
         ) : (
           <>
-            <View style={{ flexDirection: 'row', gap: 13, alignItems: 'center', marginBottom: 18 }}>
-              <AppIcon app={app} size={64} />
+            <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 12 }}>
+              <AppIcon app={app} size={48} />
               <View style={{ flex: 1 }}>
                 <Txt
                   style={{
-                    fontSize: 21,
-                    lineHeight: 27,
+                    fontSize: 18,
+                    lineHeight: 24,
                     fontFamily: 'Inter_700Bold',
                     letterSpacing: -0.5,
                   }}
@@ -737,8 +730,8 @@ export default function DetailScreen() {
               style={{
                 backgroundColor: c.moneySoft,
                 borderRadius: 24,
-                padding: 20,
-                marginBottom: 18,
+                padding: 16,
+                marginBottom: 12,
               }}
             >
               <View
@@ -780,7 +773,7 @@ export default function DetailScreen() {
                   </Txt>
                 )}
                 {rev ? (
-                  <View style={{ marginTop: 18 }}>
+                  <View style={{ marginTop: 12 }}>
                     <View
                       style={{
                         height: 5,
@@ -821,8 +814,10 @@ export default function DetailScreen() {
                   <View
                     style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: c.money }}
                   />
-                  <Txt style={{ color: c.money, fontSize: 11 }}>
-                    {rev ? 'Low confidence · your scenario · USD' : 'No revenue evidence'}
+                  <Txt style={{ color: c.money, fontSize: 11, flex: 1 }}>
+                    {rev
+                      ? `Low confidence · ${source === 'custom' ? 'your' : 'automatic'} scenario · USD`
+                      : 'No modeled revenue stream'}
                   </Txt>
                 </View>
               </PressableFeedback>
@@ -858,7 +853,7 @@ export default function DetailScreen() {
             ) : (
               <Unavailable text="No screenshots returned by the store." />
             )}
-            <Txt style={{ fontSize: 11, color: c.muted, marginTop: 9, marginBottom: 26 }}>
+            <Txt style={{ fontSize: 11, color: c.muted, marginTop: 9, marginBottom: 18 }}>
               Store screenshots · US listing
             </Txt>
             <QuickTake app={app} history={history} />
@@ -973,13 +968,15 @@ export default function DetailScreen() {
             style={{ width: width - 48, height: height * 0.54 }}
           />
         ) : (
-          <View style={{ gap: 18 }}>
+          <View style={{ gap: 16 }}>
+            {app && <RevenueAssumptions app={app} inputs={inputs} custom={source === 'custom'} />}
             <Txt style={{ lineHeight: 22 }}>
               Actual revenue is private. Public store installs, ratings and prices cannot prove MRR.
             </Txt>
             <Txt style={{ color: c.muted, lineHeight: 22 }}>
-              Your scenario uses monthly active users × paying share × monthly spend, plus ad
-              impressions ÷ 1,000 × eCPM. Low and high bounds use the active-user range you provide.
+              Monthly active users × paying share × monthly spend, plus ad impressions ÷ 1,000 ×
+              eCPM. Low and high bounds vary assumed active users only; real uncertainty can be
+              wider.
             </Txt>
             <Txt style={{ color: c.muted, lineHeight: 22 }}>
               These are explicit assumptions with low confidence, not verified earnings or a

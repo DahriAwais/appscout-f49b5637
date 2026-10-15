@@ -12,6 +12,7 @@ export default function TabLayout() {
       {/* eslint-disable-next-line react/style-prop-object -- Expo StatusBar defines style as 'auto' | 'inverted' | 'light' | 'dark', not a View style object. */}
       <StatusBar style="dark" />
       <Tabs
+        safeAreaInsets={{ bottom: 0 }}
         screenListeners={({ navigation, route }) => ({
           tabPress: () => {
             const state = navigation.getState();
@@ -34,11 +35,9 @@ export default function TabLayout() {
           tabBarIconStyle: { height: 25 },
           tabBarStyle: {
             position: 'absolute',
-            bottom: Math.max(inset.bottom, 16),
-            left: 20,
-            right: 20,
-            marginHorizontal: 20,
-            height: 68,
+            bottom: Math.max(inset.bottom, 12),
+            marginHorizontal: 16,
+            height: 60,
             paddingBottom: 8,
             paddingTop: 0,
             borderRadius: 26,
