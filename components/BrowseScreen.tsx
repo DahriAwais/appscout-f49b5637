@@ -8,6 +8,7 @@ import { colors as c } from '@/lib/theme';
 import { categories, type FeedCategory } from '@/lib/scout';
 import { selection, useScout } from '@/lib/store';
 import { usePlayList } from '@/lib/play-store';
+import { GlassChip } from './GlassControls';
 import {
   Logo,
   Txt,
@@ -151,18 +152,17 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
             contentContainerStyle={{ gap: 6, paddingVertical: 5 }}
           >
             {categories.map((cat) => (
-              <Button
+              <GlassChip
                 key={cat}
-                size="sm"
-                variant={cat === category ? 'primary' : 'tertiary'}
-                className="rounded-full"
+                label={cat}
+                selected={cat === category}
                 onPress={() => {
-                  setCategory(cat);
-                  selection();
+                  if (cat !== category) {
+                    setCategory(cat);
+                    selection();
+                  }
                 }}
-              >
-                <Button.Label numberOfLines={1}>{cat}</Button.Label>
-              </Button>
+              />
             ))}
           </ScrollView>
         )}

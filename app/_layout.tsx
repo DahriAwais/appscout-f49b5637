@@ -12,7 +12,7 @@ import {
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import * as DevClient from 'expo-dev-client';
 import { HeroUINativeProvider } from 'heroui-native';
 import { Uniwind } from 'uniwind';
@@ -21,6 +21,7 @@ import {
   type ErrorBoundaryProps,
   SplashScreen,
   Stack,
+  usePathname,
 } from 'expo-router';
 
 import { patchExpoGoAssetUrls } from '@/lib/expoGoAssets';
@@ -28,6 +29,7 @@ import { initPostHog } from '@/lib/posthog';
 import { registerServiceWorker } from '@/lib/registerServiceWorker';
 import { reportErrorToParent } from '@/lib/reportPreviewError';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { LaunchSplash } from '@/components/LaunchSplash';
 import { colors } from '@/lib/theme';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from '@/lib/play-store';
@@ -59,6 +61,11 @@ Uniwind.setTheme('light');
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const initialPath = usePathname();
+  const [launchFinished, setLaunchFinished] = useState(
+    () => Platform.OS === 'web' && initialPath !== '/',
+  );
+  const finishLaunch = useCallback(() => setLaunchFinished(true), []);
   const [loaded, error] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
@@ -146,6 +153,14 @@ export default function RootLayout() {
 
   if (!loaded && !error) {
     return null;
+  }
+
+  if (!launchFinished) {
+    return (
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
+        <LaunchSplash onFinish={finishLaunch} />
+      </GestureHandlerRootView>
+    );
   }
 
   return (

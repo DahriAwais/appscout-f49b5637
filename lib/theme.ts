@@ -19,5 +19,11 @@ export const colors = {
   teal: '#39A6AF',
   yellow: '#F5CB69',
   globeBlue: '#E6EDF5',
+  glassBlue: '#175CD3',
+  glassTint: 'rgba(232, 242, 255, 0.86)',
+  glassSelected: 'rgba(202, 225, 255, 0.82)',
+  glassBorder: 'rgba(23, 92, 211, 0.16)',
+  glassHighlight: 'rgba(255, 255, 255, 0.9)',
+  transparent: 'transparent',
   shadow: '#283B61',
 } as const;
