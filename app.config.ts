@@ -14,7 +14,10 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     slug: 'appscout',
     version: process.env.BILT_APP_VERSION ?? '1.0.0',
     orientation: 'portrait',
-    userInterfaceStyle: 'automatic',
+    userInterfaceStyle: 'light',
+    backgroundColor: '#FFFFFF',
+    // SDK 57 uses transparent edge-to-edge bars over the white app background.
+    // Icon styles are configured with the system-bar plugins below.
     scheme: 'appscout',
     runtimeVersion: {
       policy: 'appVersion',
@@ -41,7 +44,14 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     extra: {
       appStoreAppId: process.env.BILT_APP_STORE_APP_ID,
     },
-    plugins: ['expo-router', 'expo-font', ...nativePlugins],
+    plugins: [
+      'expo-router',
+      'expo-font',
+      ['expo-splash-screen', { backgroundColor: '#FFFFFF' }],
+      ['expo-status-bar', { style: 'dark' }],
+      ['expo-navigation-bar', { style: 'dark', enforceContrast: false }],
+      ...nativePlugins,
+    ],
     experiments: {
       typedRoutes: true,
       reactCompiler: true,

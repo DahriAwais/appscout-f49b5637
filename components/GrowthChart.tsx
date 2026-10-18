@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View } from 'react-native';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
-import { Button } from 'heroui-native';
+import { GlassButton as Button } from './GlassControls';
 import type { Snapshot } from '@/lib/scout';
 import { compact } from '@/lib/scout';
 import { ratingGrowth } from '@/lib/insights';

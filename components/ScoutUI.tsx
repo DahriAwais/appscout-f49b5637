@@ -1,5 +1,6 @@
 import { Text, View, Image, Platform, StyleSheet, type TextProps } from 'react-native';
-import { PressableFeedback, Button, Skeleton } from 'heroui-native';
+import { PressableFeedback, Skeleton } from 'heroui-native';
+import { GlassButton as Button } from './GlassControls';
 import { router } from 'expo-router';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
 import {
@@ -108,7 +109,13 @@ export function Revenue({ app }: { app: ScoutApp }) {
           fontFamily: value ? 'Inter_600SemiBold' : 'Inter_400Regular',
         }}
       >
-        {value ? `Est. ${money(value.mid)}/mo` : 'Est. —'}
+        {value
+          ? `Est. ${money(value.mid)}/mo`
+          : app.metadataState === 'loading'
+            ? 'Calculating…'
+            : app.metadataState === 'error'
+              ? 'Retry estimate'
+              : 'Est. unavailable'}
       </Txt>
       <PressableFeedback
         onPress={() => router.push('/methodology')}

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { View, KeyboardAvoidingView, Platform } from 'react-native';
-import { Button, Input, Label } from 'heroui-native';
+import { Input, Label } from 'heroui-native';
+import { GlassButton as Button } from './GlassControls';
 import { Plus, Hash, Trash2 } from 'lucide-react-native';
 import { useMutation } from '@tanstack/react-query';
 import Svg, { Path } from 'react-native-svg';

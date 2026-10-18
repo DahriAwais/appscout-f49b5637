@@ -12,6 +12,8 @@ import {
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { StatusBar } from 'expo-status-bar';
 import { Platform } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as SystemUI from 'expo-system-ui';
 import { useEffect, useState, useCallback } from 'react';
 import * as DevClient from 'expo-dev-client';
 import { HeroUINativeProvider } from 'heroui-native';
@@ -142,6 +144,10 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
+    if (Platform.OS !== 'web') void SystemUI.setBackgroundColorAsync(colors.white);
+  }, []);
+
+  useEffect(() => {
     registerServiceWorker();
   }, []);
 
@@ -157,45 +163,51 @@ export default function RootLayout() {
 
   if (!launchFinished) {
     return (
-      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
-        <LaunchSplash onFinish={finishLaunch} />
-      </GestureHandlerRootView>
+      <SafeAreaProvider style={{ flex: 1, backgroundColor: colors.white }}>
+        <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
+          {/* oxlint-disable-next-line react/style-prop-object -- StatusBar theme enum. */}
+          <StatusBar style="dark" />
+          <LaunchSplash onFinish={finishLaunch} />
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
     );
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
-      <QueryClientProvider client={queryClient}>
-        <HeroUINativeProvider>
-          {/* oxlint-disable-next-line react/style-prop-object -- Expo StatusBar's style is a theme enum. */}
-          <StatusBar style="dark" />
-          <Stack
-            screenOptions={{
-              contentStyle: { backgroundColor: colors.white },
-              headerStyle: { backgroundColor: colors.white },
-              headerTintColor: colors.ink,
-              headerShadowVisible: false,
-              headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
-            }}
-          >
-            <Stack.Screen name="(tabs)" options={{ title: 'Home', headerShown: false }} />
-            <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="app/[id]"
-              options={{ title: 'App research', headerBackButtonDisplayMode: 'minimal' }}
-            />
-            <Stack.Screen
-              name="estimation/[id]"
-              options={{ title: 'Revenue scenario', headerBackButtonDisplayMode: 'minimal' }}
-            />
-            <Stack.Screen
-              name="methodology"
-              options={{ title: 'Behind the estimates', headerBackButtonDisplayMode: 'minimal' }}
-            />
-          </Stack>
-          <InstallPrompt />
-        </HeroUINativeProvider>
-      </QueryClientProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider style={{ flex: 1, backgroundColor: colors.white }}>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.white }}>
+        <QueryClientProvider client={queryClient}>
+          <HeroUINativeProvider>
+            {/* oxlint-disable-next-line react/style-prop-object -- Expo StatusBar's style is a theme enum. */}
+            <StatusBar style="dark" />
+            <Stack
+              screenOptions={{
+                contentStyle: { backgroundColor: colors.white },
+                headerStyle: { backgroundColor: colors.white },
+                headerTintColor: colors.ink,
+                headerShadowVisible: false,
+                headerTitleStyle: { fontFamily: 'Inter_600SemiBold', fontSize: 16 },
+              }}
+            >
+              <Stack.Screen name="(tabs)" options={{ title: 'Home', headerShown: false }} />
+              <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="app/[id]"
+                options={{ title: 'App research', headerBackButtonDisplayMode: 'minimal' }}
+              />
+              <Stack.Screen
+                name="estimation/[id]"
+                options={{ title: 'Revenue scenario', headerBackButtonDisplayMode: 'minimal' }}
+              />
+              <Stack.Screen
+                name="methodology"
+                options={{ title: 'Behind the estimates', headerBackButtonDisplayMode: 'minimal' }}
+              />
+            </Stack>
+            <InstallPrompt />
+          </HeroUINativeProvider>
+        </QueryClientProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }

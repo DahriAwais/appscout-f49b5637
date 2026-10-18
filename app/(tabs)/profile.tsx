@@ -1,7 +1,8 @@
 import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Button, PressableFeedback } from 'heroui-native';
+import { PressableFeedback } from 'heroui-native';
+import { GlassButton as Button } from '@/components/GlassControls';
 import {
   ChevronRight,
   Calculator,
@@ -37,8 +38,8 @@ export default function ProfileScreen() {
       <View style={{ backgroundColor: c.surface, borderRadius: 24, padding: 22, marginBottom: 30 }}>
         <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 17 }}>Real store data</Txt>
         <Txt style={{ color: c.muted, lineHeight: 22, marginTop: 9 }}>
-          Search public Google Play listings. Actual revenue is private; scenarios use only the
-          assumptions you enter.
+          Search public Google Play listings. Revenue scenarios use public install and monetization
+          signals with editable assumptions; actual earnings remain private.
         </Txt>
         <SourceNotice />
       </View>

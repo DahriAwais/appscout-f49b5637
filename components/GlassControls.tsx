@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode, type RefObject } from 'react';
+import { useEffect, type ReactNode, type RefObject, type ComponentProps } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Button } from 'heroui-native';
@@ -10,6 +10,52 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { colors as c } from '@/lib/theme';
+
+function GlassButtonRoot({ children, style, variant, ...props }: ComponentProps<typeof Button>) {
+  return (
+    <Button
+      {...props}
+      variant="secondary"
+      style={[
+        {
+          backgroundColor: variant === 'primary' || !variant ? c.glassSelected : c.glassTint,
+          borderWidth: 1,
+          borderColor: c.glassBorder,
+          borderRadius: 24,
+          overflow: 'hidden',
+        },
+        style,
+      ]}
+    >
+      <BlurView pointerEvents="none" tint="light" intensity={35} style={StyleSheet.absoluteFill} />
+      <View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 10,
+          right: 10,
+          height: 1,
+          backgroundColor: c.glassHighlight,
+        }}
+      />
+      <View
+        pointerEvents="box-none"
+        style={{
+          zIndex: 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          maxWidth: '100%',
+        }}
+      >
+        {children}
+      </View>
+    </Button>
+  );
+}
+export const GlassButton = Object.assign(GlassButtonRoot, { Label: Button.Label });
 
 export function GlassBackground({ target }: { target?: RefObject<View | null> }) {
   return (
@@ -75,7 +121,7 @@ export function GlassChip({
   }));
   return (
     <Animated.View style={style}>
-      <Button
+      <GlassButton
         size="sm"
         variant="tertiary"
         className="rounded-full"
@@ -93,7 +139,7 @@ export function GlassChip({
         <Button.Label numberOfLines={1} style={{ color: c.glassBlue }}>
           {label}
         </Button.Label>
-      </Button>
+      </GlassButton>
     </Animated.View>
   );
 }

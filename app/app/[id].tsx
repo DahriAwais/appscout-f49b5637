@@ -12,7 +12,9 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Stack, Link, useLocalSearchParams, router } from 'expo-router';
-import { Button, PressableFeedback, Skeleton } from 'heroui-native';
+import { PressableFeedback, Skeleton } from 'heroui-native';
+import { GlassButton as Button } from '@/components/GlassControls';
+import { ScenarioChart, AudienceQuality } from '@/components/EstimateVisuals';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Info,
@@ -726,6 +728,16 @@ export default function DetailScreen() {
                 <Txt style={{ color: c.muted, fontSize: 11 }}>{app.category ?? 'Google Play'}</Txt>
               </View>
             </View>
+            <Txt
+              style={{
+                color: c.money,
+                fontSize: 11,
+                fontFamily: 'Inter_600SemiBold',
+                marginBottom: 7,
+              }}
+            >
+              Estimated by AppScout
+            </Txt>
             <View
               style={{
                 backgroundColor: c.moneySoft,
@@ -754,10 +766,7 @@ export default function DetailScreen() {
                   <Info size={17} color={c.money} />
                 </Button>
               </View>
-              <PressableFeedback
-                onPress={() => router.push({ pathname: '/estimation/[id]', params: { id } })}
-                accessibilityLabel="Open revenue scenario calculator"
-              >
+              <View>
                 {rev ? (
                   <CountAmount value={rev.mid} />
                 ) : (
@@ -773,38 +782,7 @@ export default function DetailScreen() {
                   </Txt>
                 )}
                 {rev ? (
-                  <View style={{ marginTop: 12 }}>
-                    <View
-                      style={{
-                        height: 5,
-                        backgroundColor: c.moneyBright,
-                        borderRadius: 3,
-                        opacity: 0.6,
-                      }}
-                    />
-                    <View
-                      style={{
-                        position: 'absolute',
-                        top: -3,
-                        left: `${rev.high > rev.low ? Math.max(0, Math.min(98, ((rev.mid - rev.low) / (rev.high - rev.low)) * 100)) : 50}%`,
-                        width: 4,
-                        height: 12,
-                        backgroundColor: c.money,
-                        borderRadius: 2,
-                      }}
-                    />
-                    <View
-                      style={{
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                        marginTop: 8,
-                      }}
-                    >
-                      <Txt style={{ color: c.money, fontSize: 11 }}>Low {money(rev.low)}</Txt>
-                      <Txt style={{ color: c.money, fontSize: 11 }}>Mid</Txt>
-                      <Txt style={{ color: c.money, fontSize: 11 }}>High {money(rev.high)}</Txt>
-                    </View>
-                  </View>
+                  <ScenarioChart result={rev} />
                 ) : (
                   <Txt style={{ color: c.money, fontSize: 12, lineHeight: 20, marginTop: 9 }}>
                     Google Play does not publish earnings.
@@ -820,7 +798,7 @@ export default function DetailScreen() {
                       : 'No modeled revenue stream'}
                   </Txt>
                 </View>
-              </PressableFeedback>
+              </View>
               <Button
                 size="sm"
                 variant="ghost"
@@ -832,13 +810,14 @@ export default function DetailScreen() {
                 </Button.Label>
               </Button>
             </View>
+            <AudienceQuality app={app} />
             {app.screenshots.length ? (
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ gap: 10, paddingBottom: 4 }}
               >
-                {app.screenshots.map((uri, i) => (
+                {[...new Set(app.screenshots)].map((uri, i) => (
                   <Screenshot
                     key={uri}
                     uri={uri}
@@ -942,7 +921,7 @@ export default function DetailScreen() {
                 <Check size={18} color={c.accent} />
               </Animated.View>
             ) : (
-              <Bookmark size={18} color={c.white} />
+              <Bookmark size={18} color={c.accent} />
             )}
             <Button.Label>{saved ? 'Added' : 'Add to watchlist'}</Button.Label>
           </Button>

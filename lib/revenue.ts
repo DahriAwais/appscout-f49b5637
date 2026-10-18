@@ -17,8 +17,16 @@ export function useRevenueScenario(app: ScoutApp | undefined) {
       : app;
   const automatic = evidence ? automaticScenario(evidence) : null;
   const inputs = saved?.inputs ?? automatic?.inputs;
+  const hasModeledStream = saved || evidence?.offersIAP === true || evidence?.adSupported === true;
   return {
-    result: inputs ? estimate(inputs) : null,
+    result: inputs && hasModeledStream ? estimate(inputs) : null,
+    dailyActive: inputs
+      ? {
+          low: Math.round(inputs.monthlyActiveLow * 0.1),
+          mid: Math.round(inputs.monthlyActive * 0.2),
+          high: Math.round(inputs.monthlyActiveHigh * 0.3),
+        }
+      : null,
     inputs,
     automatic,
     source: saved ? ('custom' as const) : automatic ? ('automatic' as const) : null,

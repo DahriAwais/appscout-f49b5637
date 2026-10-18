@@ -26,6 +26,7 @@ export interface ScoutApp {
   recentChanges: string | null;
   url: string;
   fetchedAt: string;
+  metadataState?: 'loading' | 'error' | 'ready';
 }
 export interface Snapshot {
   day: string;
@@ -60,7 +61,6 @@ export interface AutomaticScenario {
 // Scenario defaults are product assumptions, not measured retention or industry benchmarks.
 export function automaticScenario(app: ScoutApp, now = Date.now()): AutomaticScenario | null {
   if (app.installs === null || !Number.isFinite(app.installs) || app.installs <= 0) return null;
-  if (app.offersIAP !== true && app.adSupported !== true) return null;
   const launched = app.launched ? new Date(app.launched).getTime() : NaN;
   const ageMonths =
     Number.isFinite(launched) && launched <= now

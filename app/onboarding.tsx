@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View, Image, ScrollView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button } from 'heroui-native';
+import { GlassButton as Button } from '@/components/GlassControls';
+import Svg, { Path, Line, Circle } from 'react-native-svg';
 import { router, useLocalSearchParams } from 'expo-router';
 import {
   ArrowRight,
@@ -23,6 +24,8 @@ import Animated, {
   withTiming,
   Easing,
   useReducedMotion,
+  useAnimatedProps,
+  createAnimatedComponent,
 } from 'react-native-reanimated';
 import { colors as c } from '@/lib/theme';
 import { useScout, selection, success } from '@/lib/store';
@@ -82,6 +85,36 @@ function GlobeVisual({ size }: { size: number }) {
     </View>
   );
 }
+const AnimatedPath = createAnimatedComponent(Path);
+function IllustrationTrend() {
+  const trace = useSharedValue(1);
+  useEffect(() => {
+    trace.set(withTiming(0, { duration: 1600, easing: Easing.out(Easing.cubic) }));
+  }, [trace]);
+  const props = useAnimatedProps(() => ({ strokeDashoffset: trace.value * 340 }));
+  return (
+    <Svg width="100%" height={94} viewBox="0 0 250 94">
+      {[20, 50, 80].map((y) => (
+        <Line key={y} x1={0} x2={250} y1={y} y2={y} stroke={c.money} strokeOpacity={0.14} />
+      ))}
+      <Path
+        d="M 5 78 C 30 78 35 63 55 65 S 85 50 105 54 S 135 35 155 40 S 190 12 210 19 S 235 8 245 9 L245 90 L5 90Z"
+        fill={c.moneyBright}
+        fillOpacity={0.1}
+      />
+      <AnimatedPath
+        animatedProps={props}
+        d="M 5 78 C 30 78 35 63 55 65 S 85 50 105 54 S 135 35 155 40 S 190 12 210 19 S 235 8 245 9"
+        fill="none"
+        stroke={c.money}
+        strokeWidth={3}
+        strokeDasharray="340"
+        strokeLinecap="round"
+      />
+      <Circle cx={245} cy={9} r={4} fill={c.money} />
+    </Svg>
+  );
+}
 function RevenueVisual({ size }: { size: number }) {
   const [amount, setAmount] = useState(0);
   const reduced = useReducedMotion();
@@ -107,10 +140,13 @@ function RevenueVisual({ size }: { size: number }) {
       }}
     >
       <GlassClip>
-        <View style={{ padding: 24, gap: 20 }}>
+        <View style={{ padding: 22, gap: 14 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
             <Logo size={48} />
-            <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16 }}>Your next app</Txt>
+            <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 16, flex: 1 }}>
+              Your next app
+            </Txt>
+            <Sparkles size={20} color={c.accent} />
           </View>
           <Txt style={{ fontSize: 11, color: c.glassBlue }}>Illustrative estimate</Txt>
           <Txt
@@ -121,14 +157,7 @@ function RevenueVisual({ size }: { size: number }) {
             ${(reduced ? 12400 : amount).toLocaleString('en-US')}
             <Txt style={{ fontSize: 15, color: c.money }}>/mo</Txt>
           </Txt>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-end', height: 66, gap: 10 }}>
-            {[22, 30, 27, 40, 49, 58, 66].map((h) => (
-              <View
-                key={h}
-                style={{ flex: 1, height: h, borderRadius: 5, backgroundColor: c.moneyBright }}
-              />
-            ))}
-          </View>
+          <IllustrationTrend />
         </View>
       </GlassClip>
     </View>
@@ -167,19 +196,25 @@ function SearchVisual({ size }: { size: number }) {
           { id: 'check', Icon: Check },
           { id: 'sparkles', Icon: Sparkles },
           { id: 'map', Icon: MapPin },
-        ].map(({ id, Icon }) => (
-          <GlassClip key={id}>
-            <View
-              style={{
-                width: size * 0.21,
-                height: size * 0.21,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Icon size={28} color={c.glassBlue} strokeWidth={1.8} />
-            </View>
-          </GlassClip>
+        ].map(({ id, Icon }, i) => (
+          <Animated.View
+            key={id}
+            entering={FadeIn.delay(i * 90).duration(250)}
+            style={{ transform: [{ rotate: `${i % 2 ? 5 : -5}deg` }] }}
+          >
+            <GlassClip>
+              <View
+                style={{
+                  width: size * 0.21,
+                  height: size * 0.21,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}
+              >
+                <Icon size={28} color={[c.accent, c.teal, c.violet][i % 3]} strokeWidth={1.8} />
+              </View>
+            </GlassClip>
+          </Animated.View>
         ))}
       </View>
       <Animated.View
@@ -195,7 +230,39 @@ function SearchVisual({ size }: { size: number }) {
           style,
         ]}
       >
+        <View
+          style={{
+            position: 'absolute',
+            left: 5,
+            top: 5,
+            width: 92,
+            height: 92,
+            borderRadius: 46,
+            backgroundColor: c.glassTint,
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Sparkles size={34} color={c.accent} />
+        </View>
         <Search size={124} strokeWidth={1.5} color={c.glassBlue} />
+        <View
+          style={{
+            position: 'absolute',
+            left: 62,
+            top: -12,
+            backgroundColor: c.moneySoft,
+            borderRadius: 20,
+            paddingHorizontal: 10,
+            paddingVertical: 7,
+            flexDirection: 'row',
+            gap: 5,
+            alignItems: 'center',
+          }}
+        >
+          <Check size={13} color={c.money} />
+          <Txt style={{ color: c.money, fontSize: 12, fontFamily: 'Inter_600SemiBold' }}>$8K</Txt>
+        </View>
       </Animated.View>
     </View>
   );
@@ -271,7 +338,9 @@ export default function OnboardingScreen() {
           >
             {headlines[page]}
           </Txt>
-          {page === 0 && <Txt style={{ fontSize: 11, color: c.muted }}>Illustrative estimates</Txt>}
+          {(page === 0 || page === 2) && (
+            <Txt style={{ fontSize: 11, color: c.muted }}>Illustrative estimates</Txt>
+          )}
         </Animated.View>
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 22 }}>
           {headlines.map((h, i) => (
@@ -297,7 +366,7 @@ export default function OnboardingScreen() {
           }}
         >
           <Button.Label>{page === 2 ? 'Get Started' : 'Continue'}</Button.Label>
-          <ArrowRight size={18} color={c.white} />
+          <ArrowRight size={18} color={c.accent} />
         </Button>
         <View style={{ height: inset.bottom + 6 }} />
       </ScrollView>

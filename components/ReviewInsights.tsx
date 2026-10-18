@@ -1,5 +1,6 @@
 import { View } from 'react-native';
-import { Button, Skeleton } from 'heroui-native';
+import { Skeleton } from 'heroui-native';
+import { GlassButton as Button } from './GlassControls';
 import { MessageSquare } from 'lucide-react-native';
 import { colors as c } from '@/lib/theme';
 import { compact, dateLabel, type ScoutApp } from '@/lib/scout';

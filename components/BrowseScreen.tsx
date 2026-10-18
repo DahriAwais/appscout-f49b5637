@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform, FlatList } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Button, Input } from 'heroui-native';
+import { Input } from 'heroui-native';
+import { GlassButton as Button } from './GlassControls';
 import { Search, X, RefreshCw, WifiOff } from 'lucide-react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { colors as c } from '@/lib/theme';
@@ -145,6 +146,18 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
           </Txt>
         )}
         <SourceNotice />
+        {!searching && (
+          <Txt style={{ color: c.money, fontSize: 11, marginBottom: 6 }}>
+            Estimated by AppScout · monthly revenue
+          </Txt>
+        )}
+        {feed.metadataError ? (
+          <Button size="sm" onPress={refresh} isDisabled={feed.metadataPending}>
+            <Button.Label>
+              {feed.metadataPending ? 'Retrying…' : 'Retry missing estimates'}
+            </Button.Label>
+          </Button>
+        ) : null}
         {!query.trim() && (
           <ScrollView
             horizontal

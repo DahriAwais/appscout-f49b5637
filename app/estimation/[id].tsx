@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Stack, Link, useLocalSearchParams, router } from 'expo-router';
-import { Button, Input, Label, FieldError, TextField } from 'heroui-native';
+import { Input, Label, FieldError, TextField } from 'heroui-native';
+import { GlassButton as Button } from '@/components/GlassControls';
+import { ScenarioChart } from '@/components/EstimateVisuals';
 import * as Haptics from 'expo-haptics';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors as c } from '@/lib/theme';
@@ -87,7 +89,11 @@ function ScenarioForm({
     inputs.monthlyActiveLow <= inputs.monthlyActive &&
     inputs.monthlyActive <= inputs.monthlyActiveHigh;
   const calculated = !invalid && ordered ? estimate(inputs) : null;
-  const result = calculated && Object.values(calculated).every(Number.isFinite) ? calculated : null;
+  const canModelRevenue = custom || app?.offersIAP === true || app?.adSupported === true;
+  const result =
+    canModelRevenue && calculated && Object.values(calculated).every(Number.isFinite)
+      ? calculated
+      : null;
   const submit = () => {
     if (!result) {
       setError(
@@ -95,7 +101,9 @@ function ScenarioForm({
           ? `${invalid.label}: enter ${invalid.max ? 'a number from 0 to 100' : 'a valid non-negative number'}.`
           : !ordered
             ? 'Active users must follow low ≤ mid ≤ high.'
-            : 'These values are too large. Enter smaller numbers.',
+            : !canModelRevenue
+              ? 'No ads or purchases are listed. Enter your own monetization assumptions.'
+              : 'These values are too large. Enter smaller numbers.',
       );
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       return;
@@ -125,13 +133,32 @@ function ScenarioForm({
         <View
           style={{ backgroundColor: c.moneySoft, padding: 18, borderRadius: 24, marginBottom: 18 }}
         >
+          <Txt
+            style={{
+              color: c.money,
+              fontSize: 11,
+              fontFamily: 'Inter_600SemiBold',
+              marginBottom: 8,
+            }}
+          >
+            Estimated by AppScout
+          </Txt>
           <Txt style={{ color: c.money, fontSize: 12 }}>Estimated monthly revenue · USD</Txt>
           <Txt
             adjustsFontSizeToFit
-            numberOfLines={1}
-            style={{ fontFamily: 'Inter_700Bold', color: c.money, fontSize: 30, marginTop: 8 }}
+            numberOfLines={result ? 1 : 2}
+            style={{
+              fontFamily: 'Inter_700Bold',
+              color: c.money,
+              fontSize: result ? 30 : 20,
+              marginTop: 8,
+            }}
           >
-            {result ? usd(result.mid) : 'Enter your audience'}
+            {result
+              ? usd(result.mid)
+              : automatic && !canModelRevenue
+                ? 'No listed revenue stream'
+                : 'Enter your audience'}
           </Txt>
           <View style={{ gap: 8, marginTop: 16 }}>
             {(['low', 'mid', 'high'] as const).map((key) => (
@@ -147,6 +174,7 @@ function ScenarioForm({
               </View>
             ))}
           </View>
+          {result && <ScenarioChart result={result} />}
           <Txt style={{ color: c.money, fontSize: 11, marginTop: 16 }}>
             Low confidence · {custom ? 'your assumptions' : 'automatic assumptions'}
           </Txt>

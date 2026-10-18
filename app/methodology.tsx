@@ -48,6 +48,11 @@ export default function MethodologyScreen() {
           unavailable.
         </Txt>
         <Txt style={{ lineHeight: 22, marginTop: 12, color: c.muted }}>
+          Estimated DAU = monthly active users × assumed daily share (10 / 20 / 30% for low / mid /
+          high). Quality score = public Play Store rating × 2, out of 10. Neither is independently
+          measured.
+        </Txt>
+        <Txt style={{ lineHeight: 22, marginTop: 12, color: c.muted }}>
           Only active users vary across the default range. Actual earnings may fall outside it;
           conversion, spending, ad rates and geography are also unknown. Saved assumptions override
           defaults.

@@ -1,4 +1,5 @@
-import { BottomSheet, Button } from 'heroui-native';
+import { BottomSheet } from 'heroui-native';
+import { GlassButton as Button } from './GlassControls';
 import { BottomSheetScrollView } from '@gorhom/bottom-sheet';
 import { View } from 'react-native';
 import type { ReactNode } from 'react';

@@ -49,10 +49,14 @@ export function RevenueAssumptions({
         </>
       ) : (
         <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
-          Automatic modeling needs an install count and a listed ads or purchases stream. You can
-          enter your own assumptions instead.
+          Automatic audience modeling needs an install count. Revenue also needs a listed ads or
+          purchases stream. You can enter your own assumptions instead.
         </Txt>
       )}
+      <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
+        Estimated DAU uses 10 / 20 / 30% of low / mid / high monthly active users. Daily activity is
+        assumed, not public data.
+      </Txt>
       <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
         Low confidence. Defaults are uncalibrated assumptions, not industry benchmarks. Upfront app
         sales, external payments, fees and taxes are excluded. Unknown streams are not modeled; a
