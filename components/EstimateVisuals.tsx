@@ -124,7 +124,15 @@ export function AudienceQuality({ app }: { app: ScoutApp }) {
     <View style={{ gap: 10, marginBottom: 16 }}>
       <View style={{ flexDirection: width < 360 ? 'column' : 'row', gap: 10 }}>
         <View
-          style={{ flex: 1, padding: 14, borderRadius: 20, backgroundColor: c.accentSoft, gap: 10 }}
+          style={{
+            flexGrow: width < 360 ? 0 : 1,
+            flexBasis: width < 360 ? 'auto' : 0,
+            flexShrink: 0,
+            padding: 14,
+            borderRadius: 20,
+            backgroundColor: c.accentSoft,
+            gap: 10,
+          }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Star size={15} color={c.accent} />
@@ -145,7 +153,15 @@ export function AudienceQuality({ app }: { app: ScoutApp }) {
           <Txt style={{ color: c.accent, fontSize: 11 }}>From Play Store rating</Txt>
         </View>
         <View
-          style={{ flex: 1, padding: 14, borderRadius: 20, backgroundColor: c.surface, gap: 10 }}
+          style={{
+            flexGrow: width < 360 ? 0 : 1,
+            flexBasis: width < 360 ? 'auto' : 0,
+            flexShrink: 0,
+            padding: 14,
+            borderRadius: 20,
+            backgroundColor: c.surface,
+            gap: 10,
+          }}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
             <Users size={15} color={c.accent} />

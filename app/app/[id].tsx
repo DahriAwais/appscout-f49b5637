@@ -38,7 +38,7 @@ import { colors as c } from '@/lib/theme';
 import { compact, money, dateLabel, ago, type ScoutApp, type Snapshot } from '@/lib/scout';
 import { useRevenueScenario } from '@/lib/revenue';
 import { RevenueAssumptions } from '@/components/RevenueAssumptions';
-import { buildInsights, opportunityScore } from '@/lib/insights';
+import { buildInsights, opportunityScore, ratingGrowth } from '@/lib/insights';
 import { useScout } from '@/lib/store';
 import {
   usePlayDetail,
@@ -110,19 +110,23 @@ function Screenshot({
 function QuickTake({ app, history }: { app: ScoutApp; history: Snapshot[] }) {
   const insights = buildInsights(app, history);
   const score = opportunityScore(app, history);
+  const provisional = ratingGrowth(history) === null;
   return (
     <InsightCard
       title="Quick take"
       insight={
         score === null
-          ? 'Opportunity score needs measured growth'
-          : 'Heuristic score, not a revenue prediction'
+          ? 'Install count and rating needed'
+          : provisional
+            ? 'Provisional score from public listing'
+            : 'Heuristic score, not a revenue prediction'
       }
       detail={
         <Txt style={{ color: c.muted, lineHeight: 20 }}>
-          Opportunity score combines 40% install-tier demand, 30% rating gap, and 30% observed
-          ratings growth. It is withheld until at least 7 daily observations exist. A lower rating
-          suggests unmet needs, not guaranteed demand.
+          Opportunity score is a public-data heuristic out of 10: 40% install-tier demand, 30%
+          rating gap, and 30% observed ratings growth. Until 7 daily observations exist, the
+          provisional score uses only installs and rating, with their weights normalized. A lower
+          rating suggests unmet needs, not guaranteed demand.
         </Txt>
       }
     >
@@ -138,7 +142,7 @@ function QuickTake({ app, history }: { app: ScoutApp; history: Snapshot[] }) {
                 stroke={c.accent}
                 strokeWidth={5}
                 fill="none"
-                strokeDasharray={`${(score / 100) * 188.5} 188.5`}
+                strokeDasharray={`${(score / 10) * 188.5} 188.5`}
                 rotation={-90}
                 origin="35,35"
                 strokeLinecap="round"
@@ -146,13 +150,13 @@ function QuickTake({ app, history }: { app: ScoutApp; history: Snapshot[] }) {
             )}
           </Svg>
           <Txt style={{ fontSize: 22, fontFamily: 'Inter_700Bold', color: c.accent }}>
-            {score ?? '—'}
+            {score?.toFixed(1) ?? '—'}
           </Txt>
         </View>
         <View style={{ flex: 1 }}>
           <Txt style={{ fontFamily: 'Inter_600SemiBold', fontSize: 13 }}>Opportunity score</Txt>
           <Txt style={{ color: c.muted, fontSize: 11, marginTop: 5 }}>
-            {score === null ? 'Waiting for history' : 'Out of 100'}
+            {score === null ? 'Unavailable · /10' : provisional ? 'Provisional · /10' : 'Out of 10'}
           </Txt>
         </View>
       </View>
@@ -736,6 +740,7 @@ export default function DetailScreen() {
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={{ flexGrow: 0, flexShrink: 0, height: 140 }}
                 contentContainerStyle={{ gap: 10, paddingBottom: 4 }}
               >
                 {[...new Set(app.screenshots)].map((uri, i) => (

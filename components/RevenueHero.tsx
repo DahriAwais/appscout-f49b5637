@@ -28,7 +28,6 @@ import Svg, {
 import Animated, {
   Easing,
   FadeIn,
-  FadeInDown,
   createAnimatedComponent,
   useAnimatedProps,
   useAnimatedStyle,
@@ -302,16 +301,10 @@ export function RevenueHero({
   const webGlass = Platform.OS === 'web' ? { backdropFilter: 'blur(24px) saturate(160%)' } : {};
   return (
     <>
-      <Animated.View
-        entering={
-          reduced
-            ? FadeIn.duration(450)
-            : FadeInDown.duration(450)
-                .withInitialValues({ opacity: 0, transform: [{ translateY: 24 }] })
-                .springify()
-                .damping(22)
-        }
+      <View
         style={{
+          flexShrink: 0,
+          alignSelf: 'stretch',
           borderRadius: 28,
           marginBottom: 18,
           shadowColor: c.emeraldEnd,
@@ -337,6 +330,10 @@ export function RevenueHero({
           }
           style={[
             {
+              position: 'relative',
+              flexGrow: 0,
+              flexShrink: 0,
+              alignSelf: 'stretch',
               borderRadius: 28,
               overflow: 'hidden',
               borderWidth: 1,
@@ -346,19 +343,16 @@ export function RevenueHero({
             webGlass,
           ]}
         >
-          <Orbs />
-          <BlurView
-            pointerEvents="none"
-            intensity={24}
-            tint="light"
-            style={StyleSheet.absoluteFill}
-          />
-          <LinearGradient
-            colors={[c.revenueGlass, c.revenueWhite]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-          />
+          <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+            <Orbs />
+            <BlurView intensity={24} tint="light" style={StyleSheet.absoluteFill} />
+            <LinearGradient
+              colors={[c.revenueGlass, c.revenueWhite]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+          </View>
           <View
             pointerEvents="none"
             style={{ height: 1, backgroundColor: c.white, marginHorizontal: 22 }}
@@ -680,7 +674,7 @@ export function RevenueHero({
             </View>
           </View>
         </PressableFeedback>
-      </Animated.View>
+      </View>
       <ResearchSheet title="How we estimate" open={sheet} onClose={() => setSheet(false)}>
         <Txt style={{ color: c.muted, lineHeight: 21 }}>
           Public install tiers, release age and listed ads or purchases inform an assumption-based

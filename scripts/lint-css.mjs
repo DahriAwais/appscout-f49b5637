@@ -1,8 +1,9 @@
 import { transform } from 'lightningcss';
-import cssTree from 'css-tree';
+import * as cssTree from 'css-tree';
 import { globSync, readFileSync } from 'node:fs';
 
-// Lints CSS with two parsers, both already installed (no new deps):
+// Lints CSS with two parsers; css-tree is a direct dev dependency so modern
+// syntax such as @layer does not depend on an outdated transitive version:
 //   [build]  lightningcss — the exact parser uniwind/expo runs, so a throw here
 //            means the build WILL break. The authoritative gate.
 //   [syntax] css-tree — stricter recovery parser (same engine as the VSCode CSS

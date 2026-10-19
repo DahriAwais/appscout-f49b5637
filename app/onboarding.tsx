@@ -277,6 +277,7 @@ export default function OnboardingScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: c.white }}>
       <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={{
           flexGrow: 1,
           paddingTop: inset.top + 16,
@@ -342,6 +343,16 @@ export default function OnboardingScreen() {
             <Txt style={{ fontSize: 11, color: c.muted }}>Illustrative estimates</Txt>
           )}
         </Animated.View>
+      </ScrollView>
+      <View
+        style={{
+          flexShrink: 0,
+          paddingHorizontal: 20,
+          paddingTop: 12,
+          paddingBottom: inset.bottom + 24,
+          backgroundColor: c.white,
+        }}
+      >
         <View style={{ flexDirection: 'row', justifyContent: 'center', gap: 8, marginBottom: 22 }}>
           {headlines.map((h, i) => (
             <View
@@ -357,6 +368,7 @@ export default function OnboardingScreen() {
         </View>
         <Button
           className="rounded-full"
+          style={{ height: 48, flexGrow: 0, flexShrink: 0 }}
           onPress={() => {
             if (page === 2) finish();
             else {
@@ -368,8 +380,7 @@ export default function OnboardingScreen() {
           <Button.Label>{page === 2 ? 'Get Started' : 'Continue'}</Button.Label>
           <ArrowRight size={18} color={c.accent} />
         </Button>
-        <View style={{ height: inset.bottom + 6 }} />
-      </ScrollView>
+      </View>
     </View>
   );
 }

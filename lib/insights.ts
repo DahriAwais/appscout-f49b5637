@@ -43,10 +43,15 @@ export function buildInsights(app: ScoutApp, history: Snapshot[]): Insight[] {
 }
 export function opportunityScore(app: ScoutApp, history: Snapshot[]) {
   const growth = ratingGrowth(history);
-  if (growth === null || app.installs === null || app.rating === null) return null;
+  if (app.installs === null || app.rating === null) return null;
   const demand = Math.min(100, (Math.log10(Math.max(1, app.installs)) / 7) * 100);
-  const gap = ((5 - app.rating) / 4) * 100;
-  return Math.round(demand * 0.4 + gap * 0.3 + Math.min(100, Math.max(0, growth * 5)) * 0.3);
+  const gap = Math.min(100, Math.max(0, ((5 - app.rating) / 4) * 100));
+  // Without observations, normalize only the two available public-data signals.
+  const score =
+    growth === null
+      ? (demand * 0.4 + gap * 0.3) / 0.7
+      : demand * 0.4 + gap * 0.3 + Math.min(100, Math.max(0, growth * 5)) * 0.3;
+  return Math.round(Math.min(100, Math.max(0, score))) / 10;
 }
 const topics: Record<string, RegExp> = {
   Ads: /\bads?\b|advertis/i,

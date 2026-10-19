@@ -11,13 +11,24 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors as c } from '@/lib/theme';
 
-function GlassButtonRoot({ children, style, variant, ...props }: ComponentProps<typeof Button>) {
+function GlassButtonRoot({
+  children,
+  style,
+  variant,
+  size = 'md',
+  ...props
+}: ComponentProps<typeof Button>) {
   return (
     <Button
       {...props}
       variant="secondary"
+      size={size}
       style={[
         {
+          position: 'relative',
+          height: size === 'sm' ? 40 : size === 'lg' ? 56 : 48,
+          flexGrow: 0,
+          flexShrink: 0,
           backgroundColor: variant === 'primary' || !variant ? c.glassSelected : c.glassTint,
           borderWidth: 1,
           borderColor: c.glassBorder,
@@ -27,7 +38,9 @@ function GlassButtonRoot({ children, style, variant, ...props }: ComponentProps<
         style,
       ]}
     >
-      <BlurView pointerEvents="none" tint="light" intensity={35} style={StyleSheet.absoluteFill} />
+      <View pointerEvents="none" style={StyleSheet.absoluteFill}>
+        <BlurView tint="light" intensity={35} style={StyleSheet.absoluteFill} />
+      </View>
       <View
         pointerEvents="none"
         style={{
