@@ -110,7 +110,7 @@ export function Revenue({ app }: { app: ScoutApp }) {
         }}
       >
         {value
-          ? `Est. ${money(value.mid)}/mo`
+          ? `Est. ${money(value.low)}–${money(value.high)}/mo`
           : app.metadataState === 'loading'
             ? 'Calculating…'
             : app.metadataState === 'error'
@@ -129,7 +129,7 @@ export function Revenue({ app }: { app: ScoutApp }) {
 }
 export function AppCard({ app }: { app: ScoutApp }) {
   return (
-    <View style={{ width: 94 }}>
+    <View style={{ width: 124 }}>
       <PressableFeedback
         onPress={() => router.push({ pathname: '/app/[id]', params: { id: app.id } })}
         accessibilityLabel={`${app.name}, ${app.rating?.toFixed(1) ?? 'unrated'}, open research`}

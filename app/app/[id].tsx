@@ -8,13 +8,13 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
-  Animated as RNAnimated,
   useWindowDimensions,
 } from 'react-native';
 import { Stack, Link, useLocalSearchParams, router } from 'expo-router';
 import { PressableFeedback, Skeleton } from 'heroui-native';
 import { GlassButton as Button } from '@/components/GlassControls';
-import { ScenarioChart, AudienceQuality } from '@/components/EstimateVisuals';
+import { AudienceQuality } from '@/components/EstimateVisuals';
+import { RevenueHero } from '@/components/RevenueHero';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Info,
@@ -30,7 +30,7 @@ import {
   Calendar,
   RefreshCw,
 } from 'lucide-react-native';
-import Animated, { FadeIn, FadeOut, useReducedMotion } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import Svg, { Circle } from 'react-native-svg';
 import { useQuery } from '@tanstack/react-query';
 import * as Haptics from 'expo-haptics';
@@ -40,36 +40,19 @@ import { useRevenueScenario } from '@/lib/revenue';
 import { RevenueAssumptions } from '@/components/RevenueAssumptions';
 import { buildInsights, opportunityScore } from '@/lib/insights';
 import { useScout } from '@/lib/store';
-import { usePlayDetail, usePlaySection, useErrorFeedback, playRequest } from '@/lib/play-store';
+import {
+  usePlayDetail,
+  usePlayReviews,
+  usePlaySection,
+  useErrorFeedback,
+  playRequest,
+} from '@/lib/play-store';
 import { Txt, AppIcon, AppCard, EmptyState, LoadingRows } from '@/components/ScoutUI';
 import { InsightCard, Unavailable } from '@/components/InsightCard';
 import { GrowthChart } from '@/components/GrowthChart';
 import { ReviewInsights } from '@/components/ReviewInsights';
 import { KeywordTable } from '@/components/KeywordTable';
 import { ResearchSheet } from '@/components/ResearchSheet';
-function CountAmount({ value }: { value: number }) {
-  const [anim] = useState(() => new RNAnimated.Value(0));
-  const [shown, setShown] = useState(0);
-  const reduced = useReducedMotion();
-  useEffect(() => {
-    const listener = anim.addListener(({ value: next }) => setShown(next));
-    RNAnimated.timing(anim, {
-      toValue: value,
-      duration: reduced ? 0 : 600,
-      useNativeDriver: false,
-    }).start();
-    return () => {
-      anim.stopAnimation();
-      anim.removeListener(listener);
-    };
-  }, [anim, value, reduced]);
-  return (
-    <Txt style={{ fontFamily: 'Inter_700Bold', fontSize: 28, color: c.money, letterSpacing: -1 }}>
-      {money(shown)}
-      <Txt style={{ fontSize: 15, color: c.money }}>/mo est.</Txt>
-    </Txt>
-  );
-}
 function Screenshot({
   uri,
   index,
@@ -607,6 +590,7 @@ function OtherApps({ id, kind }: { id: string; kind: 'developer' | 'similar' }) 
 export default function DetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const detail = usePlayDetail(id);
+  const reviews = usePlayReviews(id);
   const app = detail.data?.app;
   const history = detail.data?.history ?? [];
   const watched = useScout((s) => s.watched);
@@ -645,7 +629,7 @@ export default function DetailScreen() {
             compactHeader ? (
               <Button size="sm" variant="ghost" onPress={info} accessibilityLabel="How we estimate">
                 <Button.Label style={{ color: rev ? c.money : c.muted, fontSize: 11 }}>
-                  {rev ? `${money(rev.mid)}/mo est.` : 'Est. —'}
+                  {rev ? `${money(rev.low)} – ${money(rev.high)}/mo est.` : 'Est. —'}
                 </Button.Label>
                 <Info size={12} color={c.accent} />
               </Button>
@@ -695,7 +679,7 @@ export default function DetailScreen() {
             </View>
             <LoadingRows />
           </>
-        ) : detail.isError || !app ? (
+        ) : !app ? (
           <EmptyState
             title="Could not load this Google Play app"
             action="Try again"
@@ -703,6 +687,16 @@ export default function DetailScreen() {
           />
         ) : (
           <>
+            {detail.isError && (
+              <Button
+                size="sm"
+                isDisabled={detail.isFetching}
+                onPress={refresh}
+                style={{ marginBottom: 12 }}
+              >
+                <Button.Label>Could not refresh · Retry</Button.Label>
+              </Button>
+            )}
             <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center', marginBottom: 12 }}>
               <AppIcon app={app} size={48} />
               <View style={{ flex: 1 }}>
@@ -728,88 +722,15 @@ export default function DetailScreen() {
                 <Txt style={{ color: c.muted, fontSize: 11 }}>{app.category ?? 'Google Play'}</Txt>
               </View>
             </View>
-            <Txt
-              style={{
-                color: c.money,
-                fontSize: 11,
-                fontFamily: 'Inter_600SemiBold',
-                marginBottom: 7,
-              }}
-            >
-              Estimated by AppScout
-            </Txt>
-            <View
-              style={{
-                backgroundColor: c.moneySoft,
-                borderRadius: 24,
-                padding: 16,
-                marginBottom: 12,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}
-              >
-                <Txt style={{ color: c.money, fontSize: 12, fontFamily: 'Inter_500Medium' }}>
-                  Est. monthly revenue
-                </Txt>
-                <Button
-                  isIconOnly
-                  size="sm"
-                  variant="ghost"
-                  onPress={info}
-                  accessibilityLabel="How we estimate"
-                >
-                  <Info size={17} color={c.money} />
-                </Button>
-              </View>
-              <View>
-                {rev ? (
-                  <CountAmount value={rev.mid} />
-                ) : (
-                  <Txt
-                    style={{
-                      fontFamily: 'Inter_700Bold',
-                      fontSize: 28,
-                      color: c.money,
-                      marginTop: 4,
-                    }}
-                  >
-                    Not estimated
-                  </Txt>
-                )}
-                {rev ? (
-                  <ScenarioChart result={rev} />
-                ) : (
-                  <Txt style={{ color: c.money, fontSize: 12, lineHeight: 20, marginTop: 9 }}>
-                    Google Play does not publish earnings.
-                  </Txt>
-                )}
-                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'center', marginTop: 14 }}>
-                  <View
-                    style={{ width: 5, height: 5, borderRadius: 3, backgroundColor: c.money }}
-                  />
-                  <Txt style={{ color: c.money, fontSize: 11, flex: 1 }}>
-                    {rev
-                      ? `Low confidence · ${source === 'custom' ? 'your' : 'automatic'} scenario · USD`
-                      : 'No modeled revenue stream'}
-                  </Txt>
-                </View>
-              </View>
-              <Button
-                size="sm"
-                variant="ghost"
-                onPress={() => router.push({ pathname: '/estimation/[id]', params: { id } })}
-                style={{ alignSelf: 'flex-start', marginLeft: -8, marginTop: 8 }}
-              >
-                <Button.Label style={{ color: c.money, fontSize: 12 }}>
-                  {rev ? 'Edit assumptions' : 'Create a revenue scenario'}
-                </Button.Label>
-              </Button>
-            </View>
+            <RevenueHero
+              result={rev}
+              app={app}
+              reviews={reviews.data?.reviews}
+              reviewError={Boolean(reviews.error || reviews.data?.error)}
+              onRetryReviews={() => void reviews.refetch()}
+              onInfo={info}
+              onOpen={() => router.push({ pathname: '/estimation/[id]', params: { id } })}
+            />
             <AudienceQuality app={app} />
             {app.screenshots.length ? (
               <ScrollView
@@ -954,8 +875,7 @@ export default function DetailScreen() {
             </Txt>
             <Txt style={{ color: c.muted, lineHeight: 22 }}>
               Monthly active users × paying share × monthly spend, plus ad impressions ÷ 1,000 ×
-              eCPM. Low and high bounds vary assumed active users only; real uncertainty can be
-              wider.
+              eCPM. The range varies assumed active users only; real uncertainty can be wider.
             </Txt>
             <Txt style={{ color: c.muted, lineHeight: 22 }}>
               These are explicit assumptions with low confidence, not verified earnings or a

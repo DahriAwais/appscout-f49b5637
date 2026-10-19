@@ -46,6 +46,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
   const feed = usePlayList(term.trim() ? 'All' : category, term);
   const data = feed.data?.apps ?? [];
   const shown = data;
+  const unavailable = feed.isError && !data.length;
   const refresh = () => {
     void feed.refetch();
   };
@@ -151,6 +152,11 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
             Estimated by AppScout · monthly revenue
           </Txt>
         )}
+        {feed.isError && data.length > 0 && (
+          <Button size="sm" onPress={refresh} isDisabled={feed.isFetching}>
+            <Button.Label>Could not refresh · Retry</Button.Label>
+          </Button>
+        )}
         {feed.metadataError ? (
           <Button size="sm" onPress={refresh} isDisabled={feed.metadataPending}>
             <Button.Label>
@@ -182,7 +188,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
       </View>
       {searching ? (
         <FlatList
-          data={feed.isPending || feed.isError ? [] : shown}
+          data={feed.isPending || unavailable ? [] : shown}
           keyExtractor={(a) => a.id}
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
@@ -225,7 +231,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
           ListEmptyComponent={
             feed.isPending ? (
               <LoadingRows />
-            ) : feed.isError ? (
+            ) : unavailable ? (
               <EmptyState
                 icon={WifiOff}
                 title="Could not load Google Play apps"
@@ -256,7 +262,7 @@ export default function BrowseScreen({ explore = false }: { explore?: boolean })
             <View style={{ paddingHorizontal: 16 }}>
               <LoadingRows />
             </View>
-          ) : feed.isError ? (
+          ) : unavailable ? (
             <EmptyState
               icon={WifiOff}
               title="Could not load Google Play apps"

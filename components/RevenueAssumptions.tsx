@@ -29,8 +29,8 @@ export function RevenueAssumptions({
       </Txt>
       {!custom && automatic && (
         <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
-          Active share: {automatic.activeShares.join(' / ')}% of the install lower bound (low / mid
-          / high).
+          Est. active share: {automatic.activeShares[0]}–{automatic.activeShares[2]}% of the install
+          lower bound.
           {automatic.ageMonths === null
             ? ' Launch age unknown.'
             : ` Launch age: about ${Math.floor(automatic.ageMonths)} ${Math.floor(automatic.ageMonths) === 1 ? 'month' : 'months'}.`}
@@ -39,7 +39,7 @@ export function RevenueAssumptions({
       {inputs ? (
         <>
           <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
-            Active users: {compact(inputs.monthlyActiveLow)} / {compact(inputs.monthlyActive)} /{' '}
+            Est. active users: {compact(inputs.monthlyActiveLow)}–
             {compact(inputs.monthlyActiveHigh)} per month.
           </Txt>
           <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
@@ -54,8 +54,8 @@ export function RevenueAssumptions({
         </Txt>
       )}
       <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
-        Estimated DAU uses 10 / 20 / 30% of low / mid / high monthly active users. Daily activity is
-        assumed, not public data.
+        Est. DAU spans 10% of the smaller monthly audience to 30% of the larger audience. Daily
+        activity is assumed, not public data.
       </Txt>
       <Txt style={{ fontSize: 12, color: c.muted, lineHeight: 19 }}>
         Low confidence. Defaults are uncalibrated assumptions, not industry benchmarks. Upfront app

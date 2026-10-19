@@ -14,9 +14,15 @@ interface ScoutState {
   watched: string[];
   recent: string[];
   savedApps: Record<string, ScoutApp>;
-  scenarios: Record<string, { mid: number; inputs: Scenario }>;
+  feeds: Record<string, { apps: ScoutApp[]; fetchedAt: string; country: string }>;
+  rememberApps: (apps: ScoutApp[]) => void;
+  rememberFeed: (
+    key: string,
+    feed: { apps: ScoutApp[]; fetchedAt: string; country: string },
+  ) => void;
+  scenarios: Record<string, { mid: number; inputs: Scenario; feePercent?: number }>;
   rememberApp: (app: ScoutApp) => void;
-  saveScenario: (id: string, inputs: Scenario, mid: number) => void;
+  saveScenario: (id: string, inputs: Scenario, mid: number, feePercent?: number) => void;
   completeOnboarding: () => void;
   toggleWatch: (id: string) => void;
   addRecent: (query: string) => void;
@@ -29,10 +35,16 @@ export const useScout = create<ScoutState>()(
       watched: [],
       recent: [],
       savedApps: {},
+      feeds: {},
+      rememberApps: (apps) =>
+        set((s) => ({
+          savedApps: { ...s.savedApps, ...Object.fromEntries(apps.map((a) => [a.id, a])) },
+        })),
+      rememberFeed: (key, feed) => set((s) => ({ feeds: { ...s.feeds, [key]: feed } })),
       scenarios: {},
       rememberApp: (app) => set((s) => ({ savedApps: { ...s.savedApps, [app.id]: app } })),
-      saveScenario: (id, inputs, mid) => {
-        set((s) => ({ scenarios: { ...s.scenarios, [id]: { mid, inputs } } }));
+      saveScenario: (id, inputs, mid, feePercent) => {
+        set((s) => ({ scenarios: { ...s.scenarios, [id]: { mid, inputs, feePercent } } }));
         success();
       },
       completeOnboarding: () => set({ onboarded: true }),
