@@ -1,5 +1,5 @@
 import { View } from 'react-native';
-import { Skeleton } from 'heroui-native';
+import { LoadingSkeleton as Skeleton } from './LoadingSkeleton';
 import { GlassButton as Button } from './GlassControls';
 import { MessageSquare } from 'lucide-react-native';
 import { colors as c } from '@/lib/theme';

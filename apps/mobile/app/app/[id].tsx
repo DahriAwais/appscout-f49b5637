@@ -11,7 +11,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { Stack, Link, useLocalSearchParams, router } from 'expo-router';
-import { PressableFeedback, Skeleton } from 'heroui-native';
+import { PressableFeedback } from 'heroui-native';
+import { LoadingSkeleton as Skeleton } from '@/components/LoadingSkeleton';
 import { GlassButton as Button } from '@/components/GlassControls';
 import { AudienceQuality } from '@/components/EstimateVisuals';
 import { RevenueHero } from '@/components/RevenueHero';

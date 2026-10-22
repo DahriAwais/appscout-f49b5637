@@ -1,5 +1,6 @@
 import { Text, View, Image, Platform, StyleSheet, type TextProps } from 'react-native';
-import { PressableFeedback, Skeleton } from 'heroui-native';
+import { PressableFeedback } from 'heroui-native';
+import { LoadingSkeleton as Skeleton } from './LoadingSkeleton';
 import { GlassButton as Button } from './GlassControls';
 import { router } from 'expo-router';
 import Svg, { Path, Circle, Rect } from 'react-native-svg';
