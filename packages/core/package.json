@@ -1,0 +1,16 @@
+{
+  "name": "@appscout/core",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./scout": "./src/scout.ts",
+    "./insights": "./src/insights.ts",
+    "./review-trend": "./src/review-trend.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test test/*.test.ts"
+  }
+}

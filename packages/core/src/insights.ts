@@ -46,7 +46,6 @@ export function opportunityScore(app: ScoutApp, history: Snapshot[]) {
   if (app.installs === null || app.rating === null) return null;
   const demand = Math.min(100, (Math.log10(Math.max(1, app.installs)) / 7) * 100);
   const gap = Math.min(100, Math.max(0, ((5 - app.rating) / 4) * 100));
-  // Without observations, normalize only the two available public-data signals.
   const score =
     growth === null
       ? (demand * 0.4 + gap * 0.3) / 0.7

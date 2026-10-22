@@ -1,15 +1,25 @@
 {
   "name": "bilt-starter",
   "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "main": "expo-router/entry",
   "scripts": {
+    "prepare": "node scripts/setup-mobile.mjs",
+    "desktop:dev": "npm run dev -w @appscout/desktop",
+    "desktop:build": "npm run build -w @appscout/desktop",
+    "desktop:package": "npm run package:win -w @appscout/desktop",
+    "desktop:check": "npm run typecheck -w @appscout/desktop && npm run typecheck -w @appscout/core && npm run test -w @appscout/core",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "expo-check": "expo install --check --npm",
     "export:web": "expo export -p web",
     "build:pwa": "expo export -p web && workbox generateSW workbox-config.js",
     "lint": "oxlint --type-aware --type-check",
-    "lint:css": "node scripts/lint-css.mjs",
+    "lint:css": "node scripts/lint-css.mjs && node scripts/check-desktop.mjs",
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check ."
   },
@@ -24,6 +34,7 @@
     "@react-navigation/native": "^7.1.8",
     "@shopify/flash-list": "2.0.2",
     "@tanstack/react-query": "^5.104.2",
+    "@tanstack/react-virtual": "^3.13.0",
     "babel-plugin-inline-import": "~3.0.0",
     "babel-preset-expo": "~57.0.9",
     "class-variance-authority": "~0.7.1",
@@ -67,10 +78,16 @@
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/runtime": "~7.28.6",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^25.6.0",
     "@types/react": "~19.2.4",
+    "@types/react-dom": "~19.2.3",
+    "@vitejs/plugin-react": "^5.0.0",
     "babel-plugin-react-compiler": "^19.0.0-beta-af1b7da-20250417",
     "css-tree": "^3.2.1",
+    "electron": "40.0.0",
+    "electron-builder": "^26.0.0",
+    "esbuild": "^0.25.0",
     "eslint-plugin-expo": "^1.1.0",
     "eslint-plugin-react-compiler": "^19.1.0-rc.2",
     "eslint-plugin-react-native": "^5.0.0",
@@ -80,6 +97,7 @@
     "tailwindcss": "^4.3.2",
     "tsx": "~4.21.0",
     "typescript": "~6.0.3",
+    "vite": "^7.0.0",
     "workbox-cli": "^7.4.1"
   },
   "engines": {

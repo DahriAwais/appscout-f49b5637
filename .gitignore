@@ -45,6 +45,15 @@ android
 ios
 notes.txt
 
+# Desktop build output and local release configuration
+apps/desktop/dist-electron/
+apps/desktop/release/
+apps/desktop/public/icon.png
+apps/desktop/electron-builder.release.json
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+
 # Bun
 bun.lock
 bun.lockb

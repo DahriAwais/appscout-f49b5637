@@ -59,11 +59,17 @@
   },
   "ignorePatterns": [
     "dist",
+    "apps/desktop/dist-electron/**",
     "context",
     ".expo",
     "node_modules",
     "android/app/build",
-    "uniwind-types.d.ts"
+    "uniwind-types.d.ts",
+    "/app/**",
+    "/assets/**",
+    "/components/**",
+    "/hooks/**",
+    "/lib/**"
   ],
   "overrides": [
     {

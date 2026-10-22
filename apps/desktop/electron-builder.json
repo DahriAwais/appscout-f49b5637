@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
+  "appId": "com.appscout.mrr.desktop",
+  "productName": "AppScout MRR",
+  "copyright": "Copyright © AppScout",
+  "electronVersion": "40.0.0",
+  "directories": { "output": "release", "buildResources": "build" },
+  "files": ["dist/**/*", "dist-electron/**/*", "package.json"],
+  "asar": true,
+  "asarUnpack": ["**/*.node"],
+  "npmRebuild": true,
+  "win": {
+    "target": [{ "target": "nsis", "arch": ["x64"] }],
+    "icon": "../../public/icons/icon-512.png",
+    "artifactName": "AppScout-MRR-${version}-${arch}-Setup.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "AppScout MRR",
+    "deleteAppDataOnUninstall": false
+  },
+  "publish": []
+}

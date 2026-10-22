@@ -1,0 +1,14 @@
+{
+  "name": "@appscout/mobile",
+  "version": "1.0.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "cd ../.. && expo start",
+    "android": "cd ../.. && expo run:android",
+    "ios": "cd ../.. && expo run:ios"
+  },
+  "dependencies": {
+    "@appscout/core": "1.0.0"
+  }
+}

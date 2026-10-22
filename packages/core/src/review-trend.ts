@@ -1,7 +1,7 @@
 import type { StoreReview } from './scout';
 export type RevenueRange = { low: number; mid: number; high: number };
 export type TrendPoint = RevenueRange & { label: string; date: string; count: number };
-// Newest-review samples are truncated. Never interpret unsampled older months as zero activity.
+// Unsampled older months are not zero activity.
 export function reviewTrend(
   reviews: StoreReview[],
   range: RevenueRange,
@@ -13,8 +13,8 @@ export function reviewTrend(
     .sort((a, b) => a.getTime() - b.getTime());
   if (dates.length < 20) return [];
   const first = dates[0];
-  const coveredStart = new Date(first.getFullYear(), first.getMonth() + 1, 1);
-  const requestedStart = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
+  const coveredStart = new Date(first.getFullYear(), first.getMonth() + 1, 1),
+    requestedStart = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
   const start = coveredStart > requestedStart ? coveredStart : requestedStart;
   const buckets: { date: Date; count: number; rate: number }[] = [];
   for (let d = new Date(start); d <= now; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {

@@ -1,0 +1,14 @@
+{
+  "extends": "./electron-builder.json",
+  "forceCodeSigning": true,
+  "win": {
+    "signtoolOptions": {
+      "publisherName": "YOUR LEGAL PUBLISHER NAME",
+      "signingHashAlgorithms": ["sha256"],
+      "rfc3161TimeStampServer": "http://timestamp.digicert.com"
+    }
+  },
+  "publish": [
+    { "provider": "generic", "url": "https://YOUR-UPDATE-HOST.example/appscout/windows/" }
+  ]
+}

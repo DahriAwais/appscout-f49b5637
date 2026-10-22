@@ -5,10 +5,20 @@
     "jsx": "react-native",
     "types": ["node"],
     "paths": {
-      "@/*": ["./*"],
-      "@/assets/*": ["./assets/*"]
+      "@/*": ["./apps/mobile/*"],
+      "@/assets/*": ["./apps/mobile/assets/*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts", "uniwind-types.d.ts"],
-  "exclude": ["context"]
+  "include": [
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "apps/mobile/**/*.ts",
+    "apps/mobile/**/*.tsx",
+    "app.config.ts",
+    "global.d.ts",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "uniwind-types.d.ts"
+  ],
+  "exclude": ["node_modules", "context"]
 }

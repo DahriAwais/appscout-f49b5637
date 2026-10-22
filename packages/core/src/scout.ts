@@ -1,3 +1,4 @@
+import { DEFAULT_PAID_CONVERSION } from './config';
 export interface ScoutApp {
   id: string;
   name: string;
@@ -57,8 +58,7 @@ export interface AutomaticScenario {
   activeShares: readonly [number, number, number];
   ageMonths: number | null;
 }
-
-// Scenario defaults are product assumptions, not measured retention or industry benchmarks.
+// Assumptions, not measured retention or market benchmarks.
 export function automaticScenario(app: ScoutApp, now = Date.now()): AutomaticScenario | null {
   if (app.installs === null || !Number.isFinite(app.installs) || app.installs <= 0) return null;
   const launched = app.launched ? new Date(app.launched).getTime() : NaN;
@@ -81,23 +81,21 @@ export function automaticScenario(app: ScoutApp, now = Date.now()): AutomaticSce
       monthlyActiveLow: Math.round((app.installs * activeShares[0]) / 100),
       monthlyActive: Math.round((app.installs * activeShares[1]) / 100),
       monthlyActiveHigh: Math.round((app.installs * activeShares[2]) / 100),
-      payingPercent: app.offersIAP === true ? 1 : 0,
+      payingPercent: app.offersIAP === true ? DEFAULT_PAID_CONVERSION : 0,
       monthlySpend: app.offersIAP === true ? 5 : 0,
       impressions: app.adSupported === true ? 40 : 0,
       ecpm: app.adSupported === true ? 2 : 0,
     },
   };
 }
-
 export function estimate(s: Scenario) {
   const purchases = ((s.monthlyActive * s.payingPercent) / 100) * s.monthlySpend;
   const ads = ((s.monthlyActive * s.impressions) / 1000) * s.ecpm;
-  const mid = purchases + ads;
   const perUser = (s.payingPercent / 100) * s.monthlySpend + (s.impressions / 1000) * s.ecpm;
   return {
     purchases,
     ads,
-    mid,
+    mid: purchases + ads,
     low: s.monthlyActiveLow * perUser,
     high: s.monthlyActiveHigh * perUser,
   };
