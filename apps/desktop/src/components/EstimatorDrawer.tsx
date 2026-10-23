@@ -10,15 +10,9 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
-import {
-  automaticScenario,
-  compact,
-  estimate,
-  money,
-  type ScoutApp,
-  type Scenario,
-} from '@appscout/core';
+import { compact, estimate, money, type ScoutApp, type Scenario } from '@appscout/core';
 import { message } from '../hooks';
+import { modeled } from '../model';
 interface Props {
   app: ScoutApp;
   custom?: Scenario;
@@ -53,19 +47,9 @@ const fields: {
   { key: 'ecpm', label: 'Ad eCPM', min: 0, max: 50, step: 0.1, suffix: ' USD' },
 ];
 export function EstimatorDrawer({ app, custom, close, save }: Props) {
-  const defaults = automaticScenario(app)?.inputs;
-  const initial = custom ?? defaults;
-  const [inputs, setInputs] = useState<Scenario>(
-    initial ?? {
-      monthlyActiveLow: 0,
-      monthlyActive: 0,
-      monthlyActiveHigh: 0,
-      payingPercent: app.offersIAP ? 6 : 0,
-      monthlySpend: app.offersIAP ? 5 : 0,
-      impressions: app.adSupported ? 40 : 0,
-      ecpm: app.adSupported ? 2 : 0,
-    },
-  );
+  const defaultModel = modeled(app);
+  const defaults = defaultModel.inputs;
+  const [inputs, setInputs] = useState<Scenario>(custom ?? defaults);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState('');
   const reduced = useReducedMotion();
@@ -221,6 +205,7 @@ export function EstimatorDrawer({ app, custom, close, save }: Props) {
           ))}
           <section className="assumptions">
             <h3>How we estimate</h3>
+            {defaultModel.note && <p>Default scenario: {defaultModel.note}</p>}
             <p>
               Purchases = monthly active users × paid conversion × monthly spend. Ads = active users
               × ad impressions × eCPM ÷ 1,000.
@@ -250,13 +235,7 @@ export function EstimatorDrawer({ app, custom, close, save }: Props) {
           )}
         </div>
         <footer>
-          <button
-            className="secondary"
-            disabled={busy || !defaults}
-            onClick={() => {
-              if (defaults) setInputs(defaults);
-            }}
-          >
+          <button className="secondary" disabled={busy} onClick={() => setInputs(defaults)}>
             <RotateCcw size={15} />
             Defaults
           </button>

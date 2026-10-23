@@ -16,7 +16,7 @@ import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { release } from 'node:os';
 import { z } from 'zod';
-import { automaticScenario, estimate, type Scenario } from '@appscout/core';
+import { modeled } from '../src/model';
 import { Cache } from './cache';
 import { ScraperService } from './scraper';
 import type { Result } from './contracts';
@@ -168,12 +168,9 @@ function registerIPC() {
       appIDs.map(async (id) => {
         const observation = await scraper.detail(id, exportState.settings.country);
         const a = observation.value;
-        const inputs: Scenario | undefined =
-          exportState.scenarios[id] ?? automaticScenario(a)?.inputs;
-        const revenue =
-          inputs && (a.offersIAP || a.adSupported || exportState.scenarios[id])
-            ? estimate(inputs).mid
-            : null;
+        const model = modeled(a, exportState.scenarios[id]);
+        const inputs = model.inputs;
+        const revenue = model.result.mid;
         return [
           a.name,
           a.id,
@@ -185,13 +182,13 @@ function registerIPC() {
           a.updated ? new Date(a.updated).toISOString() : '',
           a.fetchedAt,
           exportState.settings.country,
-          exportState.scenarios[id] ? 'Custom assumptions' : 'Automatic assumptions',
+          [model.basis, model.note].filter(Boolean).join(' · '),
           observation.stale ? 'Stale cache' : observation.cached ? 'Cached' : 'Fresh',
-          inputs?.monthlyActive,
-          inputs?.payingPercent,
-          inputs?.monthlySpend,
-          inputs?.impressions,
-          inputs?.ecpm,
+          inputs.monthlyActive,
+          inputs.payingPercent,
+          inputs.monthlySpend,
+          inputs.impressions,
+          inputs.ecpm,
           'Modeled monthly revenue; not verified subscription MRR',
         ];
       }),

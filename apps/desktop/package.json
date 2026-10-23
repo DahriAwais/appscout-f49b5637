@@ -8,6 +8,7 @@
     "dev": "node scripts/dev.mjs",
     "build": "npm run typecheck && node scripts/copy-icon.mjs && vite build && node scripts/build-electron.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "tsx --test src/model.test.ts",
     "package:release": "npm run build && electron-builder --win nsis --config electron-builder.release.json --publish never",
     "package:win": "npm run build && electron-builder --win nsis --config electron-builder.json",
     "postinstall": "electron-builder install-app-deps"

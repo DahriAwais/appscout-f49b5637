@@ -23,6 +23,7 @@ import {
   type Scenario,
 } from '@appscout/core';
 import { desktop } from '../api';
+import { modeled } from '../model';
 import { message } from '../hooks';
 import { RevenueHero, RatingsChart, RatingDistribution } from './Charts';
 import { ReviewList } from './ReviewList';
@@ -157,7 +158,7 @@ export function Detail(props: Props) {
         </div>
       </div>
       <div className="detail-header">
-        <AppIcon app={app} size={80} />
+        <AppIcon app={app} size={60} />
         <div>
           <h1>{app.name}</h1>
           <button
@@ -347,8 +348,12 @@ export function Detail(props: Props) {
                 </dd>
               </div>
               <div>
-                <dt>Default paid conversion</dt>
-                <dd>6% assumed</dd>
+                <dt>Estimate basis</dt>
+                <dd>{modeled(app, props.custom).basis}</dd>
+              </div>
+              <div>
+                <dt>Paid conversion</dt>
+                <dd>{modeled(app, props.custom).inputs.payingPercent}% assumed</dd>
               </div>
             </dl>
             <button className="secondary full" onClick={() => props.estimate(app)}>

@@ -449,11 +449,19 @@ export default function App() {
                         <h2>{app.name}</h2>
                       </button>
                       <p className="muted">{app.developer}</p>
+                      <p className="estimate-basis">
+                        {app.metadataState === 'loading' ? 'Loading…' : model.basis}
+                      </p>
+                      {app.metadataState !== 'loading' && model.note && (
+                        <p className="muted">{model.note}</p>
+                      )}
                       <dl>
                         <div>
                           <dt>Estimated monthly revenue</dt>
                           <dd className="money-text">
-                            {model ? `${money(model.result.mid)} /mo` : 'Unavailable'}
+                            {app.metadataState === 'loading'
+                              ? 'Loading…'
+                              : `${money(model.result.mid)} /mo`}
                           </dd>
                         </div>
                         <div>
@@ -462,7 +470,9 @@ export default function App() {
                         </div>
                         <div>
                           <dt>Estimated DAU</dt>
-                          <dd>{model ? compact(model.dau) : 'Unavailable'}</dd>
+                          <dd>
+                            {app.metadataState === 'loading' ? 'Loading…' : compact(model.dau)}
+                          </dd>
                         </div>
                         <div>
                           <dt>Rating</dt>

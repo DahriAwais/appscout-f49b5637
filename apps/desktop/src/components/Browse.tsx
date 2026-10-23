@@ -153,7 +153,7 @@ export function Browse(props: BrowseProps) {
             sort === 'name'
               ? app.name
               : sort === 'mrr'
-                ? (modeled(app, scenarios[app.id])?.result.mid ?? -1)
+                ? modeled(app, scenarios[app.id]).result.mid
                 : sort === 'category'
                   ? (app.category ?? '')
                   : sort === 'rating'
@@ -369,17 +369,18 @@ export function Browse(props: BrowseProps) {
                     <div className="card-money">
                       {app.metadataState === 'loading' ? (
                         <span className="skeleton-line" />
-                      ) : model ? (
+                      ) : (
                         <>
                           {money(model.result.mid)}
                           <small> /mo</small>
                         </>
-                      ) : (
-                        <span className="unavailable">
-                          {app.metadataState === 'error' ? 'Retry details' : 'Estimate unavailable'}
-                        </span>
                       )}
                     </div>
+                    {app.metadataState !== 'loading' && (
+                      <div className="estimate-basis" title={model.note || model.basis}>
+                        {model.basis}
+                      </div>
+                    )}
                     <div className="card-meta">
                       <span>
                         <Star size={13} />
@@ -428,11 +429,10 @@ export function Browse(props: BrowseProps) {
                 const model = modeled(app, scenarios[app.id]);
                 const values: Record<Column, string> = {
                   category: app.category ?? '—',
-                  mrr: model
-                    ? `${money(model.result.mid)} /mo`
-                    : app.metadataState === 'loading'
+                  mrr:
+                    app.metadataState === 'loading'
                       ? 'Loading…'
-                      : 'Unavailable',
+                      : `${money(model.result.mid)} /mo · ${model.basis}`,
                   growth:
                     growths[app.id] !== null && growths[app.id] !== undefined
                       ? `${growths[app.id]! >= 0 ? '+' : ''}${growths[app.id]!.toFixed(1)}%`
@@ -454,7 +454,15 @@ export function Browse(props: BrowseProps) {
                       </button>
                     </td>
                     {columns.map((col) => (
-                      <td key={col} className={col === 'mrr' ? 'money-text' : ''}>
+                      <td
+                        key={col}
+                        className={col === 'mrr' ? 'money-text' : ''}
+                        title={
+                          col === 'mrr' && app.metadataState !== 'loading'
+                            ? model.note || model.basis
+                            : undefined
+                        }
+                      >
                         {values[col]}
                       </td>
                     ))}

@@ -34,22 +34,19 @@ interface Props {
   onEstimate: () => void;
 }
 export function RevenueHero({ app, custom, history, reviews, onEstimate }: Props) {
-  const model = modeled(app, custom);
-  const activity = custom ?? automaticScenario(app)?.inputs;
-  const dailyActive = activity ? Math.round(activity.monthlyActive * 0.2) : null;
+  const model = useMemo(() => modeled(app, custom), [app, custom]);
+  const dailyActive = model.dau;
   const [metric, setMetric] = useState<'mrr' | 'downloads' | 'dau'>('mrr');
   const [months, setMonths] = useState(6);
   const reduced = useReducedMotion();
   const data = useMemo(() => {
     if (metric === 'mrr')
-      return model
-        ? reviewTrend(reviews, model.result, months).map((p) => ({
-            label: p.label,
-            value: p.mid,
-            band: [p.low, p.high],
-            count: p.count,
-          }))
-        : [];
+      return reviewTrend(reviews, model.result, months).map((p) => ({
+        label: p.label,
+        value: p.mid,
+        band: [p.low, p.high],
+        count: p.count,
+      }));
     const observations = history
       .slice(-Math.round(months * 31))
       .filter((h) => h.min_installs !== null)
@@ -59,49 +56,50 @@ export function RevenueHero({ app, custom, history, reviews, onEstimate }: Props
         const active =
           custom && app.installs && h.min_installs !== null
             ? (custom.monthlyActive * h.min_installs) / app.installs
-            : inputs?.monthlyActive;
+            : (inputs?.monthlyActive ?? modeled(observed).inputs.monthlyActive);
         return {
           label: new Date(h.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          value:
-            metric === 'downloads'
-              ? h.min_installs
-              : active !== undefined
-                ? Math.round(active * 0.2)
-                : null,
+          value: metric === 'downloads' ? h.min_installs : Math.round(active * 0.2),
         };
       })
       .filter((point) => point.value !== null);
     if (observations.length) return observations;
-    const active = custom ?? automaticScenario(app)?.inputs;
-    const baseline =
-      metric === 'downloads'
-        ? app.installs
-        : active
-          ? Math.round(active.monthlyActive * 0.2)
-          : null;
-    return baseline !== null ? [{ label: 'Listing baseline', value: baseline }] : [];
+    const active = model.inputs;
+    const baseline = metric === 'downloads' ? app.installs : Math.round(active.monthlyActive * 0.2);
+    return baseline !== null
+      ? [
+          {
+            label:
+              metric === 'dau'
+                ? model.basis === 'Illustrative audience'
+                  ? 'Assumed audience'
+                  : 'Modeled DAU baseline'
+                : 'Listing baseline',
+            value: baseline,
+          },
+        ]
+      : [];
   }, [app, history, reviews, months, metric, model, custom]);
-  const sensitivity = metric === 'mrr' && data.length < 2 && model !== null;
-  const sensitivityPurchases = !!model?.inputs.monthlySpend;
-  const chartData =
-    sensitivity && model
-      ? Array.from({ length: 11 }, (_, i) => {
-          const assumption =
-            (i / 10) *
-            (sensitivityPurchases
-              ? Math.max(12, model.inputs.payingPercent * 2)
-              : Math.max(4, model.inputs.ecpm * 2));
-          const result = estimate({
-            ...model.inputs,
-            ...(sensitivityPurchases ? { payingPercent: assumption } : { ecpm: assumption }),
-          });
-          return {
-            label: sensitivityPurchases ? `${assumption.toFixed(1)}%` : `$${assumption.toFixed(1)}`,
-            value: result.mid,
-            band: [result.low, result.high],
-          };
-        })
-      : data;
+  const sensitivity = metric === 'mrr' && data.length < 2;
+  const sensitivityPurchases = !!model.inputs.monthlySpend;
+  const chartData = sensitivity
+    ? Array.from({ length: 11 }, (_, i) => {
+        const assumption =
+          (i / 10) *
+          (sensitivityPurchases
+            ? Math.max(12, model.inputs.payingPercent * 2)
+            : Math.max(4, model.inputs.ecpm * 2));
+        const result = estimate({
+          ...model.inputs,
+          ...(sensitivityPurchases ? { payingPercent: assumption } : { ecpm: assumption }),
+        });
+        return {
+          label: sensitivityPurchases ? `${assumption.toFixed(1)}%` : `$${assumption.toFixed(1)}`,
+          value: result.mid,
+          band: [result.low, result.high],
+        };
+      })
+    : data;
   return (
     <section className="revenue-outer">
       <motion.div
@@ -124,20 +122,17 @@ export function RevenueHero({ app, custom, history, reviews, onEstimate }: Props
           </button>
         </div>
         <button className="mrr-number" title="Open estimation drawer" onClick={onEstimate}>
-          {model ? (
-            <motion.span
-              key={Math.round(model.result.mid)}
-              initial={{ opacity: 0.5 }}
-              animate={{ opacity: 1 }}
-            >
-              {money(model.result.mid)}
-            </motion.span>
-          ) : (
-            'Unavailable'
-          )}
-          {model && <span className="per-month"> /mo</span>}
+          <motion.span
+            key={Math.round(model.result.mid)}
+            initial={{ opacity: 0.5 }}
+            animate={{ opacity: 1 }}
+          >
+            {money(model.result.mid)}
+          </motion.span>
+          <span className="per-month"> /mo</span>
         </button>
-        <p className="provenance">Modeled by AppScout · Not verified subscription MRR</p>
+        <p className="provenance">{model.basis} · Not verified subscription MRR</p>
+        {model.note && <p className="provenance small">{model.note}</p>}
         <div className="hero-stats">
           <button
             className={metric === 'downloads' ? 'selected' : ''}
@@ -156,13 +151,16 @@ export function RevenueHero({ app, custom, history, reviews, onEstimate }: Props
             <Users size={17} />
             <span>
               Estimated DAU
-              <strong>{dailyActive !== null ? compact(dailyActive) : 'Unavailable'}</strong>
+              <strong>{compact(dailyActive)}</strong>
             </span>
           </button>
           <button className={metric === 'mrr' ? 'selected' : ''} onClick={() => setMetric('mrr')}>
             <TrendingUp size={17} />
             <span>
-              Revenue model<strong>{custom ? 'Custom' : 'Public listing'}</strong>
+              Revenue model
+              <strong>
+                {custom ? 'Custom' : model.basis === 'Listing-based model' ? 'Listing' : 'Assumed'}
+              </strong>
             </span>
           </button>
         </div>
@@ -247,13 +245,7 @@ export function RevenueHero({ app, custom, history, reviews, onEstimate }: Props
         ) : (
           <div className="chart-empty">
             <TrendingUp size={24} />
-            <span>
-              {metric === 'mrr'
-                ? 'This listing does not support a revenue estimate.'
-                : metric === 'downloads'
-                  ? 'This listing does not provide an install lower bound.'
-                  : 'An install lower bound or custom active-user assumption is needed to model DAU.'}
-            </span>
+            <span>This listing does not provide an install lower bound.</span>
             <button className="text-button" onClick={onEstimate}>
               View assumptions
             </button>
