@@ -5,12 +5,11 @@ import {
   Search,
   Bookmark,
   GitCompareArrows,
+  Sparkles,
   KeyRound,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
-  Minus,
-  Square,
   X,
   Download,
   RefreshCw,
@@ -24,6 +23,7 @@ import { modeled } from './model';
 import { Browse, Empty, AppIcon } from './components/Browse';
 import { Detail } from './components/Detail';
 import { EstimatorDrawer } from './components/EstimatorDrawer';
+import { Onboarding } from './components/Onboarding';
 import { CommandPalette } from './components/CommandPalette';
 const links = [
   { id: 'discover' as const, label: 'Discover', icon: Compass },
@@ -56,7 +56,7 @@ function readRoute(): { page: Page; id: string | null } {
 }
 export default function App() {
   const workspace = useWorkspace();
-  const { state, watch, settings, scenario, busy, setError, load } = workspace;
+  const { state, watch, settings, scenario, busy, setError, load, completeOnboarding } = workspace;
   const [route, setRoute] = useState(readRoute),
     [backPage, setBackPage] = useState<Page>(() => readRoute().page),
     [category, setCategory] = useState('All'),
@@ -70,7 +70,13 @@ export default function App() {
     [notice, setNotice] = useState(''),
     [update, setUpdate] = useState(''),
     [updating, setUpdating] = useState(false);
-  const feed = useFeed(category, search, developer, state?.settings, keyword);
+  const feed = useFeed(
+    category,
+    search,
+    developer,
+    state?.onboarded ? state.settings : undefined,
+    keyword,
+  );
   useEffect(() => {
     const listener = () => setRoute(readRoute());
     window.addEventListener('hashchange', listener);
@@ -155,6 +161,7 @@ export default function App() {
   );
   useEffect(() => {
     function key(e: KeyboardEvent) {
+      if (!state?.onboarded) return;
       const target = e.target;
       const input =
         target instanceof HTMLElement &&
@@ -189,7 +196,18 @@ export default function App() {
     }
     window.addEventListener('keydown', key);
     return () => window.removeEventListener('keydown', key);
-  }, [palette, drawer, route.id, backPage, navigate, activeApp, watch, step, setError]);
+  }, [
+    state?.onboarded,
+    palette,
+    drawer,
+    route.id,
+    backPage,
+    navigate,
+    activeApp,
+    watch,
+    step,
+    setError,
+  ]);
   const exportCSV = useCallback(
     async (ids?: string[]) => {
       try {
@@ -237,27 +255,10 @@ export default function App() {
         )}
       </div>
     );
+  if (!state.onboarded) return <Onboarding complete={completeOnboarding} />;
   const collapsed = state.settings.collapsed;
   return (
     <div className={`desktop-shell ${collapsed ? 'collapsed' : ''}`}>
-      <header className="titlebar">
-        <div className="titlebar-label">AppScout MRR</div>
-        <div className="window-controls">
-          <button aria-label="Minimize" onClick={() => void desktop.window('minimize')}>
-            <Minus size={14} />
-          </button>
-          <button aria-label="Maximize or restore" onClick={() => void desktop.window('maximize')}>
-            <Square size={12} />
-          </button>
-          <button
-            className="window-close"
-            aria-label="Close window"
-            onClick={() => void desktop.window('close')}
-          >
-            <X size={15} />
-          </button>
-        </div>
-      </header>
       <aside className="sidebar">
         <div className="brand">
           <img src="./logo.svg" width={36} height={36} alt="" />
@@ -350,6 +351,12 @@ export default function App() {
           <span className="observed-badge">
             {state.settings.offline ? 'Cached data' : 'Google Play · Public data'}
           </span>
+          <button
+            className="primary upgrade-button"
+            onClick={() => void desktop.showBetaInfo().catch((error) => setError(message(error)))}
+          >
+            <Sparkles size={16} /> Upgrade
+          </button>
         </div>
         <main className="content">
           {workspace.error && (

@@ -8,17 +8,21 @@ export function useWorkspace() {
   const [state, setState] = useState<LocalState | null>(null),
     [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const onboardingCompleted = useRef(false);
+  const applyState = useCallback((response: LocalState) => {
+    setState({ ...response, onboarded: response.onboarded || onboardingCompleted.current });
+  }, []);
   const load = useCallback(
     () =>
       desktop
         .state()
         .then(async (response) => {
           setError('');
-          setState(response);
+          applyState(response);
           const refreshed = await Promise.allSettled(
             response.watchlist.map((a) => desktop.detail(a.id)),
           );
-          setState(await desktop.state());
+          applyState(await desktop.state());
           if (refreshed.some((r) => r.status === 'rejected'))
             setError(
               'Some watchlist apps could not refresh. Cached observations are still available.',
@@ -27,7 +31,7 @@ export function useWorkspace() {
         .catch((e: unknown) => {
           setError(message(e));
         }),
-    [],
+    [applyState],
   );
   useEffect(() => {
     void load();
@@ -60,7 +64,12 @@ export function useWorkspace() {
     await desktop.scenario(id, value);
     setState((s) => (s ? { ...s, scenarios: { ...s.scenarios, [id]: value } } : s));
   }, []);
-  return { state, error, setError, load, watch, settings, scenario, busy };
+  const completeOnboarding = useCallback(async () => {
+    await desktop.completeOnboarding();
+    onboardingCompleted.current = true;
+    setState((current) => (current ? { ...current, onboarded: true } : current));
+  }, []);
+  return { state, error, setError, load, watch, settings, scenario, busy, completeOnboarding };
 }
 export function useFeed(
   category: string,

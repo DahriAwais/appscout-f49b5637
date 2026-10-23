@@ -19,6 +19,7 @@ export interface FeedEvent {
   done?: boolean;
 }
 export interface LocalState {
+  onboarded: boolean;
   updatesAvailable: boolean;
   watchlist: ScoutApp[];
   scenarios: Record<string, Scenario>;
@@ -41,6 +42,8 @@ export interface DesktopAPI {
   similar(id: string): Promise<CacheResult<ScoutApp[]>>;
   history(id: string): Promise<Snapshot[]>;
   state(): Promise<LocalState>;
+  completeOnboarding(): Promise<void>;
+  showBetaInfo(): Promise<void>;
   watch(id: string, saved: boolean): Promise<LocalState>;
   scenario(id: string, value: Scenario): Promise<void>;
   settings(value: DesktopSettings): Promise<void>;

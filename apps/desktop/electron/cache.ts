@@ -59,6 +59,7 @@ export class Cache {
       autoUpdates: false,
     });
     return {
+      onboarded: this.preference<boolean>('onboarded', false),
       updatesAvailable: false,
       watchlist: rows.map((r) => {
         const saved = JSON.parse(r.payload) as ScoutApp;

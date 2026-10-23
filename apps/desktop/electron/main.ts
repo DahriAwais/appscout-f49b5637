@@ -5,6 +5,7 @@ import {
   dialog,
   shell,
   nativeTheme,
+  screen,
   type IpcMainInvokeEvent,
 } from 'electron';
 import updater from 'electron-updater';
@@ -60,6 +61,7 @@ let cache: Cache;
 let scraper: ScraperService;
 let daily: ReturnType<typeof setInterval> | undefined;
 let downloaded = false;
+let quitting = false;
 const updateConfigured = () =>
   app.isPackaged && existsSync(join(process.resourcesPath, 'app-update.yml'));
 function trusted(event: IpcMainInvokeEvent) {
@@ -88,6 +90,19 @@ function handle<T>(channel: string, handler: (...args: unknown[]) => Promise<T> 
 }
 function registerIPC() {
   handle('scout:state', () => ({ ...cache.state(), updatesAvailable: updateConfigured() }));
+  handle('scout:onboarding-complete', () => cache.setPreference('onboarded', true));
+  handle('scout:beta-info', async () => {
+    if (!win) throw new Error('The app window is not available.');
+    await dialog.showMessageBox(win, {
+      type: 'info',
+      title: 'AppScout beta',
+      message: 'AppScout is completely free.',
+      detail: 'This app is in beta. You can use all current features for free.',
+      buttons: ['Got it'],
+      defaultId: 0,
+      noLink: true,
+    });
+  });
   handle('scout:feed', (category, token) =>
     scraper.feed(
       z
@@ -239,12 +254,20 @@ function registerIPC() {
 }
 async function createWindow() {
   const mica = process.platform === 'win32' && Number(release().split('.')[2]) >= 22000;
+  const { workArea } = screen.getPrimaryDisplay();
   win = new BrowserWindow({
-    width: 1440,
-    height: 960,
-    minWidth: 1024,
-    minHeight: 700,
-    frame: false,
+    width: Math.min(1100, workArea.width),
+    height: Math.min(700, workArea.height),
+    minWidth: Math.min(800, workArea.width),
+    minHeight: Math.min(550, workArea.height),
+    x: workArea.x + Math.floor((workArea.width - Math.min(1100, workArea.width)) / 2),
+    y: workArea.y + Math.floor((workArea.height - Math.min(700, workArea.height)) / 2),
+    frame: true,
+    resizable: true,
+    minimizable: true,
+    maximizable: true,
+    closable: true,
+    fullscreen: false,
     show: false,
     backgroundColor: '#F7F8FA',
     ...(mica ? { backgroundMaterial: 'mica' as const } : {}),
@@ -262,37 +285,64 @@ async function createWindow() {
     height: 280,
     frame: false,
     resizable: false,
+    show: false,
     alwaysOnTop: true,
     backgroundColor: '#FFFFFF',
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
   });
-  await splash.loadFile(join(dir, useDev ? '../public/splash.html' : '../dist/splash.html'));
-  win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
-  win.webContents.on('will-navigate', (event, url) => {
+  const mainWindow = win;
+  const splashWindow = splash;
+  let splashShownAt = 0;
+  let revealTimer: ReturnType<typeof setTimeout> | undefined;
+  function closeSplash() {
+    if (!splashWindow.isDestroyed()) splashWindow.close();
+    if (splash === splashWindow) splash = null;
+  }
+  mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  mainWindow.webContents.on('will-navigate', (event, url) => {
     if (url.split('#')[0] !== (useDev ? devURL : pathToFileURL(rendererFile).href))
       event.preventDefault();
   });
-  win.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) =>
+  mainWindow.webContents.session.setPermissionRequestHandler((_contents, _permission, callback) =>
     callback(false),
   );
-  win.webContents.on('did-fail-load', () => {
-    splash?.close();
-    splash = null;
+  mainWindow.webContents.on('did-fail-load', (_event, code, _description, _url, isMainFrame) => {
+    if (!isMainFrame || code === -3 || mainWindow.isDestroyed()) return;
+    clearTimeout(revealTimer);
+    closeSplash();
     void dialog.showMessageBox({
       type: 'error',
       message: 'AppScout could not open. Reinstall the app or try restarting it.',
     });
   });
-  win.once('ready-to-show', () => {
-    splash?.close();
-    splash = null;
-    win?.show();
+  mainWindow.once('ready-to-show', () => {
+    if (mainWindow.isDestroyed()) return;
+    revealTimer = setTimeout(
+      () => {
+        if (mainWindow.isDestroyed()) return;
+        closeSplash();
+        mainWindow.show();
+      },
+      Math.max(0, 2000 - (Date.now() - splashShownAt)),
+    );
   });
-  win.on('closed', () => {
-    win = null;
+  mainWindow.on('closed', () => {
+    clearTimeout(revealTimer);
+    closeSplash();
+    if (win === mainWindow) win = null;
   });
-  if (useDev) await win.loadURL(devURL);
-  else await win.loadFile(rendererFile);
+  splashWindow.on('closed', () => {
+    if (splash === splashWindow) splash = null;
+  });
+  await splashWindow.loadFile(join(dir, useDev ? '../public/splash.html' : '../dist/splash.html'));
+  if (mainWindow.isDestroyed()) return;
+  if (!splashWindow.isDestroyed()) {
+    splashWindow.center();
+    splashWindow.show();
+  }
+  splashShownAt = Date.now();
+  if (useDev) await mainWindow.loadURL(devURL);
+  else await mainWindow.loadFile(rendererFile);
 }
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
@@ -322,7 +372,9 @@ else {
         win?.webContents.send('scout:update-event', 'Update check failed. Please try again.'),
       );
       await createWindow();
+      if (quitting) return;
       await scraper.dailySnapshots();
+      if (quitting) return;
       daily = setInterval(
         () => {
           void scraper.dailySnapshots();
@@ -337,6 +389,7 @@ else {
         void autoUpdater.checkForUpdates().catch(() => {});
     })
     .catch((error) => {
+      if (quitting) return;
       dialog.showErrorBox(
         'AppScout could not start',
         error instanceof Error ? error.message : 'Please reinstall the app.',
@@ -345,6 +398,8 @@ else {
     });
   app.on('window-all-closed', () => app.quit());
   app.on('before-quit', () => {
+    if (quitting) return;
+    quitting = true;
     if (daily) clearInterval(daily);
     cache?.close();
   });

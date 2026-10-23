@@ -208,42 +208,11 @@ kbd {
   height: 100vh;
   display: grid;
   grid-template-columns: var(--sidebar-width) 1fr;
-  grid-template-rows: 36px 1fr;
+  grid-template-rows: 1fr;
   overflow: hidden;
 }
 .desktop-shell.collapsed {
   --sidebar-width: 72px;
-}
-.titlebar {
-  grid-column: 1/-1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(247, 248, 250, 0.82);
-  border-bottom: 1px solid var(--line);
-  user-select: none;
-  -webkit-app-region: drag;
-}
-.titlebar-label {
-  padding-left: 16px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.window-controls {
-  display: flex;
-  height: 100%;
-  -webkit-app-region: no-drag;
-}
-.window-controls button {
-  width: 46px;
-  border-radius: 0;
-}
-.window-controls button:hover {
-  background: var(--line);
-}
-.window-controls .window-close:hover {
-  background: var(--red);
-  color: var(--white);
 }
 .sidebar {
   background: var(--surface);
@@ -348,6 +317,7 @@ kbd {
   padding: 8px 12px;
   max-width: 720px;
   flex: 1;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
@@ -361,6 +331,11 @@ kbd {
   background: none;
   padding: 4px 0;
   outline: none;
+}
+.upgrade-button {
+  flex: none;
+  white-space: nowrap;
+  margin-left: auto;
 }
 .observed-badge {
   margin-left: auto;
@@ -1383,6 +1358,9 @@ dd {
   }
 }
 @media (max-width: 1200px) {
+  .app-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
   .content {
     padding: 24px;
   }
@@ -1433,6 +1411,41 @@ dd {
     font-size: 12px;
   }
 }
+@media (max-width: 1000px) {
+  .desktop-shell {
+    --sidebar-width: 208px;
+  }
+  .topbar {
+    gap: 12px;
+    padding: 16px;
+  }
+  .content {
+    padding: 20px;
+  }
+  .app-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .detail-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .detail-aside {
+    position: static;
+  }
+  .page-heading {
+    flex-wrap: wrap;
+  }
+  .browse-toolbar {
+    flex-wrap: wrap;
+    padding-bottom: 12px;
+  }
+  .category-tabs {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .detail-header {
+    flex-wrap: wrap;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1471,7 +1484,6 @@ dd {
     height: auto;
     overflow: visible;
   }
-  .titlebar,
   .sidebar,
   .topbar,
   .button-row,
